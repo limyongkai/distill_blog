@@ -1,0 +1,14 @@
+name: "distill_blog"
+title: "My Blog"
+description: |
+  My Blog
+output_dir: "_site"
+navbar:
+  right:
+    - text: "R Resource"
+      href: https://www.pullrequest.com/blog/how-to-implement-dark-mode-with-css-js/
+    - text: "Home"
+      href: index.html
+    - text: "About"
+      href: about.html
+output: distill::distill_article

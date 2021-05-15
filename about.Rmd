@@ -1,0 +1,9 @@
+---
+title: "About this blog"
+description: |
+  This is the first trial distill blog created. 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
