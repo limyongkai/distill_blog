@@ -6,14 +6,14 @@
       "description": "Getting to know Yong Kai~. ",
       "author": [],
       "contents": "\r\nTo be Updated later~~~\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-05-22T01:28:48+08:00"
+      "last_modified": "2021-05-22T02:08:24+08:00"
     },
     {
       "path": "index.html",
       "title": "Hi",
       "author": [],
       "contents": "\r\n\r\nd-title, d-byline {\r\n  display: none\r\n}\r\n\r\n\r\nLim Yong Kai\r\nMaster of IT in Business Student at Singapore Management University\r\n  \r\n\r\nHello!\r\nI am a student pursuing my Master of IT in Business at Singapore Management University.\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-05-22T01:44:47+08:00"
+      "last_modified": "2021-05-22T02:08:15+08:00"
     },
     {
       "path": "portfolio.html",
@@ -21,7 +21,7 @@
       "description": "My Data Analysis works~. ",
       "author": [],
       "contents": "\r\nTo be Updated later~~~\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-05-22T01:31:23+08:00"
+      "last_modified": "2021-05-22T02:07:56+08:00"
     }
   ],
   "collections": ["posts/posts.json"]
