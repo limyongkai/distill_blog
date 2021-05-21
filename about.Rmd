@@ -7,3 +7,4 @@ description: |
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
+<img src="logo.svg" style="position:absolute;top:0px;right:0px;" />

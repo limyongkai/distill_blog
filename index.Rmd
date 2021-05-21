@@ -3,3 +3,26 @@ title: "My Blog"
 site: distill::distill_website
 listing: posts
 ---
+```{r load_packages, message=FALSE, warning=FALSE, include=FALSE} 
+library(fontawesome)
+```
+
+<style>
+d-title, d-byline {
+  display: none
+}
+</style>
+
+<div class=profile>
+<img src="assets/img/profile.png" class="profile-circle">
+
+Jannik M. Buhr
+
+Computational Biochemist
+
+[`r fa("twitter")`](https://jmbuhr.de/#contact)
+[`r fa("twitter")`](https://twitter.com/JannikBuhr)
+[`r fa("github")`](https://github.com/jmbuhr)
+[`r fa("linkedin")`](https://www.linkedin.com/in/jmbuhr/)
+[`r fa("stack-overflow")`](https://stackoverflow.com/users/9130337/jannik-buhr?tab=profile)
+</div>
