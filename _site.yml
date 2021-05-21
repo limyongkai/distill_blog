@@ -1,26 +1,35 @@
-name: "distill_blog"
-title: "My Blog"
+name: "Yong Kai"
+title: "Yong Kai"
+base_url: "https://limyongkai.netlify.app/"
 theme: theme.css
 description: |
   My Blog
 output_dir: "_site"
 favicon: assets/img/favicon.png
 navbar:
+  search: true
+  logo:
+    image: assets/img/logo2.png
+    href: https://limyongkai.netlify.app/
   right:
     - icon: fab fa-github
-      href: https://github.com/rstudio/distill
-    - text: "R Resource"
-      href: https://www.pullrequest.com/blog/how-to-implement-dark-mode-with-css-js/
+      href: https://github.com/limyongkai/distill_blog
     - text: "Home"
       href: index.html
+    - text: "Portfolio"
+      href: portfolio.html
     - text: "About"
       href: about.html
+    - icon: fas fa-adjust
   collections:
     posts:
       share: [twitter, linkedin]
     
 output:
   distill::distill_article:
+    theme: theme.css
+    highlight: rstudio
     includes:
+      in_header: "_utterances.html"
       after_body: "_after_body.html"
 

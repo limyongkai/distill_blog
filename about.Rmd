@@ -1,10 +1,6 @@
 ---
-title: "About this blog"
+title: "About Me!"
 description: |
-  This is the first trial distill blog created. 
+  Getting to know Yong Kai~. 
 ---
-
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
-```
-<img src="logo.svg" style="position:absolute;top:0px;right:0px;" />
+# To be Updated later~~~

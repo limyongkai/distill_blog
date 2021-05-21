@@ -2,18 +2,26 @@
   "articles": [
     {
       "path": "about.html",
-      "title": "About this blog",
-      "description": "This is the first trial distill blog created. ",
+      "title": "About Me!",
+      "description": "Getting to know Yong Kai~. ",
       "author": [],
-      "contents": "\r\n\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-05-16T01:06:59+08:00"
+      "contents": "\r\nTo be Updated later~~~\r\n\r\n\r\n\r\n",
+      "last_modified": "2021-05-22T01:28:48+08:00"
     },
     {
       "path": "index.html",
-      "title": "My Blog",
+      "title": "Hi",
       "author": [],
-      "contents": "\r\n\r\nd-title, d-byline {\r\n  display: none\r\n}\r\n\r\n\r\nJannik M. Buhr\r\nComputational Biochemist\r\n    \r\n\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-05-16T01:17:49+08:00"
+      "contents": "\r\n\r\nd-title, d-byline {\r\n  display: none\r\n}\r\n\r\n\r\nLim Yong Kai\r\nMaster of IT in Business Student at Singapore Management University\r\n  \r\n\r\nHello!\r\nI am a student pursuing my Master of IT in Business at Singapore Management University.\r\n\r\n\r\n\r\n",
+      "last_modified": "2021-05-22T01:32:25+08:00"
+    },
+    {
+      "path": "portfolio.html",
+      "title": "My Portfolio",
+      "description": "My Data Analysis works~. ",
+      "author": [],
+      "contents": "\r\nTo be Updated later~~~\r\n\r\n\r\n\r\n",
+      "last_modified": "2021-05-22T01:31:23+08:00"
     }
   ],
   "collections": ["posts/posts.json"]
