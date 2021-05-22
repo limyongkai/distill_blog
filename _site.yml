@@ -4,11 +4,11 @@ base_url: "https://limyongkai.netlify.app/"
 theme: theme.css
 description: "My Blog"
 output_dir: "_site"
-favicon: assets/img/favicon.png
+favicon: assets/img/test.png
 navbar:
   search: true
   logo:
-    image: assets/img/logo2.png
+    image: assets/img/red_YK.png
     href: https://limyongkai.netlify.app/
   right:
     - icon: fab fa-github

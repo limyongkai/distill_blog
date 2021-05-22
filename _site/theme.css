@@ -174,13 +174,18 @@ d-appendix {
 /* These properties only apply to Distill sites and blogs  */
 
 .distill-site-header {
-  --title-size:       18px;
+  --title-size:       28px;
   --text-color:       rgba(0, 0, 0, 0.8);
-  --text-size:        17px;
+  --text-size:        28px;
   --hover-color:      var(--primary);
   --bkgd-color:       rgba(210, 210, 210, 0.8); #0F2E3D; */
 }
-
+.distill-site-header .logo img {
+   max-height: 28px;
+   width: auto;
+   margin-top: 5px;
+   margin-bottom: : 1px;
+}
 .distill-site-footer {
   --text-color:       rgba(0, 0, 0, 0.6);
   --text-size:        15px;
