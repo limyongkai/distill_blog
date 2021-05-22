@@ -2,8 +2,7 @@ name: "Yong Kai"
 title: "Yong Kai"
 base_url: "https://limyongkai.netlify.app/"
 theme: theme.css
-description: |
-  My Blog
+description: "My Blog"
 output_dir: "_site"
 favicon: assets/img/favicon.png
 navbar:
@@ -16,8 +15,8 @@ navbar:
       href: https://github.com/limyongkai/distill_blog
     - text: "Home"
       href: index.html
-    - text: "Portfolio"
-      href: portfolio.html
+    - text: "Post"
+      href: post.html
     - text: "About"
       href: about.html
     - icon: fas fa-adjust

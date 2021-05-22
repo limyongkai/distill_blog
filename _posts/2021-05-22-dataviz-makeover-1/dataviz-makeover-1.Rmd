@@ -1,0 +1,32 @@
+---
+title: "DataViz Makeover 1"
+description: |
+  DataViz Makeover 1
+author:
+  - name: Yong Kai Lim 
+    url: https://limyongkai.netlify.app/
+    affiliation: Singapore Management University
+date: 05-22-2021
+output:
+  distill::distill_article:
+    self_contained: false
+    theme: lumen
+    font-size: 48px 
+font-family: sans serif
+mainfont: \usepackage[T1]{fontenc}    
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# The original Visualisation
+
+Figure 1 below shows the original visualisation for the top six trading countries with Singapore in 2019 to 2020 using the data provided by Department of Statistics, Singapore (DOS).
+
+```{r test, fig.align = 'center', fig.cap = 'Original Visualisation', echo=FALSE}
+knitr::include_graphics("org_visual.png")
+```
+
+# Critiques for the original visualisation
+Before looking at the visualisation aesthetics and clarity, it is important to have a clear understanding of  the context and objective of the visualisation.  
+

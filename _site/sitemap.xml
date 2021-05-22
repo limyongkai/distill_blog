@@ -2,18 +2,22 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" version="1.0">
   <url>
     <loc>https://limyongkai.netlify.app/about.html</loc>
-    <lastmod>2021-05-22T09:24:23+08:00</lastmod>
+    <lastmod>2021-05-22T12:39:40+08:00</lastmod>
   </url>
   <url>
     <loc>https://limyongkai.netlify.app/</loc>
     <lastmod>2021-05-22T01:15:35+08:00</lastmod>
   </url>
   <url>
-    <loc>https://limyongkai.netlify.app/portfolio.html</loc>
-    <lastmod>2021-05-22T09:23:58+08:00</lastmod>
+    <loc>https://limyongkai.netlify.app/post.html</loc>
+    <lastmod>2021-05-22T11:50:20+08:00</lastmod>
   </url>
   <url>
-    <loc>https://limyongkai.netlify.app/posts/welcome/</loc>
-    <lastmod>2021-05-22T00:21:36+08:00</lastmod>
+    <loc>https://limyongkai.netlify.app/posts/2021-05-22-dataviz-makeover-1/</loc>
+    <lastmod>2021-05-22T12:14:05+08:00</lastmod>
+  </url>
+  <url>
+    <loc>https://limyongkai.netlify.app/posts/2021-05-22-my-1st-post/</loc>
+    <lastmod>2021-05-22T12:43:17+08:00</lastmod>
   </url>
 </urlset>

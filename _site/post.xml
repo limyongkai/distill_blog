@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:media="http://search.yahoo.com/mrss/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0">
+  <channel>
+    <title>Yong Kai</title>
+    <link>https://limyongkai.netlify.app/</link>
+    <atom:link href="https://limyongkai.netlify.app/post.xml" rel="self" type="application/rss+xml"/>
+    <description>My Blog</description>
+    <image>
+      <title>Yong Kai</title>
+      <url>https://limyongkai.netlify.app/assets/img/favicon.png</url>
+      <link>https://limyongkai.netlify.app/</link>
+    </image>
+    <generator>Distill</generator>
+    <lastBuildDate>Sat, 22 May 2021 00:00:00 +0000</lastBuildDate>
+    <item>
+      <title>DataViz Makeover 1</title>
+      <dc:creator>Yong Kai Lim</dc:creator>
+      <link>https://limyongkai.netlify.app/posts/2021-05-22-dataviz-makeover-1</link>
+      <description>DataViz Makeover 1</description>
+      <guid>https://limyongkai.netlify.app/posts/2021-05-22-dataviz-makeover-1</guid>
+      <pubDate>Sat, 22 May 2021 00:00:00 +0000</pubDate>
+      <media:content url="https://limyongkai.netlify.app/posts/2021-05-22-dataviz-makeover-1/org_visual.png" medium="image" type="image/png" width="3207" height="1668"/>
+    </item>
+    <item>
+      <title>My 1st Post</title>
+      <dc:creator>Yong Kai Lim</dc:creator>
+      <link>https://limyongkai.netlify.app/posts/2021-05-22-my-1st-post</link>
+      <description>A short description of the post as per Session 3 of ISSS608 Visual Analytics module.</description>
+      <guid>https://limyongkai.netlify.app/posts/2021-05-22-my-1st-post</guid>
+      <pubDate>Sun, 16 May 2021 00:00:00 +0000</pubDate>
+    </item>
+  </channel>
+</rss>
