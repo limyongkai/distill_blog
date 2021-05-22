@@ -174,9 +174,9 @@ d-appendix {
 /* These properties only apply to Distill sites and blogs  */
 
 .distill-site-header {
-  --title-size:       24px;
+  --title-size:       18px;
   --text-color:       rgba(0, 0, 0, 0.8);
-  --text-size:        22px;
+  --text-size:        17px;
   --hover-color:      var(--primary);
   --bkgd-color:       rgba(210, 210, 210, 0.8); #0F2E3D; */
 }
@@ -531,17 +531,4 @@ details h4 {
 .darkmode .dataTables_wrapper .dataTables_paginate {
   color: var(--nord4);
   background-color: var(--nord1);
-}
-
-.icon-link {
-    background-color: var(--color-primary);
-    color: var(--color-white);
-    padding: 3px 5px 3px 5px;
-    margin: 0 2px 0 2px;
-    border-radius: 5px; /* Rounded edges */
-}
-
-.icon-link:hover {
-    background-color: var(--color-secondary);
-    color: var(--color-white);
 }
