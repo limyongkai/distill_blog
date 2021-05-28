@@ -108,15 +108,17 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
   <meta property="twitter:description" content="DataViz Makeover 1"/>
   
   <!--/radix_placeholder_meta_tags-->
+  
+  <meta name="citation_reference" content="citation_title=Data visualization: Clarity or aesthetics?;citation_publication_date=2012;citation_author=Ben Jones"/>
   <!--radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-rmarkdown-metadata">
-  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","date","output","font-family","mainfont"]}},"value":[{"type":"character","attributes":{},"value":["DataViz Makeover 1"]},{"type":"character","attributes":{},"value":["DataViz Makeover 1\n"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation"]}},"value":[{"type":"character","attributes":{},"value":["Yong Kai Lim"]},{"type":"character","attributes":{},"value":["https://limyongkai.netlify.app/"]},{"type":"character","attributes":{},"value":["Singapore Management University"]}]}]},{"type":"character","attributes":{},"value":["05-22-2021"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","theme","font-size"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["lumen"]},{"type":"character","attributes":{},"value":["48px"]}]}]},{"type":"character","attributes":{},"value":["sans serif"]},{"type":"character","attributes":{},"value":["\\usepackage[T1]{fontenc}"]}]}
+  {"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["title","description","author","date","output","bibliography","font-family","mainfont"]}},"value":[{"type":"character","attributes":{},"value":["DataViz Makeover 1"]},{"type":"character","attributes":{},"value":["DataViz Makeover 1\n"]},{"type":"list","attributes":{},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["name","url","affiliation"]}},"value":[{"type":"character","attributes":{},"value":["Yong Kai Lim"]},{"type":"character","attributes":{},"value":["https://limyongkai.netlify.app/"]},{"type":"character","attributes":{},"value":["Singapore Management University"]}]}]},{"type":"character","attributes":{},"value":["05-22-2021"]},{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["distill::distill_article"]}},"value":[{"type":"list","attributes":{"names":{"type":"character","attributes":{},"value":["self_contained","theme","font-size"]}},"value":[{"type":"logical","attributes":{},"value":[false]},{"type":"character","attributes":{},"value":["lumen"]},{"type":"character","attributes":{},"value":["48px"]}]}]},{"type":"character","attributes":{},"value":["references.bib"]},{"type":"character","attributes":{},"value":["sans serif"]},{"type":"character","attributes":{},"value":["\\usepackage[T1]{fontenc}"]}]}
   </script>
   <!--/radix_placeholder_rmarkdown_metadata-->
   
   <script type="text/json" id="radix-resource-manifest">
-  {"type":"character","attributes":{},"value":["dataviz-makeover-1_files/anchor-4.2.2/anchor.min.js","dataviz-makeover-1_files/bowser-1.9.3/bowser.min.js","dataviz-makeover-1_files/distill-2.2.21/template.v2.js","dataviz-makeover-1_files/jquery-1.11.3/jquery.min.js","dataviz-makeover-1_files/popper-2.6.0/popper.min.js","dataviz-makeover-1_files/tippy-6.2.7/tippy-bundle.umd.min.js","dataviz-makeover-1_files/tippy-6.2.7/tippy-light-border.css","dataviz-makeover-1_files/tippy-6.2.7/tippy.css","dataviz-makeover-1_files/tippy-6.2.7/tippy.umd.min.js","dataviz-makeover-1_files/webcomponents-2.0.0/webcomponents.js","org_visual.png"]}
+  {"type":"character","attributes":{},"value":["dataviz-makeover-1_files/anchor-4.2.2/anchor.min.js","dataviz-makeover-1_files/bowser-1.9.3/bowser.min.js","dataviz-makeover-1_files/distill-2.2.21/template.v2.js","dataviz-makeover-1_files/jquery-1.11.3/jquery.min.js","dataviz-makeover-1_files/popper-2.6.0/popper.min.js","dataviz-makeover-1_files/tippy-6.2.7/tippy-bundle.umd.min.js","dataviz-makeover-1_files/tippy-6.2.7/tippy-light-border.css","dataviz-makeover-1_files/tippy-6.2.7/tippy.css","dataviz-makeover-1_files/tippy-6.2.7/tippy.umd.min.js","dataviz-makeover-1_files/webcomponents-2.0.0/webcomponents.js","img/clarity_aesthetics_chart.jpg","img/dataprep/import_step1.PNG","img/dataprep/import_step2.PNG","img/dataprep/import_step21.PNG","img/dataprep/import_step3.PNG","img/dataprep/import_step4.PNG","img/dataprep/import_step5.png","img/dataprep/import_step51.PNG","img/dataprep/import_step6.PNG","img/dataprep/import_step61.PNG","img/dataprep/import_step71.PNG","img/dataprep/import_step81.PNG","img/dataviz/barchart-1.PNG","img/dataviz/barchart-2.PNG","img/dataviz/dashboard-1.PNG","img/dataviz/dashboard-2.PNG","img/dataviz/filter.PNG","img/dataviz/lineplot-1.PNG","img/dataviz/lineplot-2.PNG","img/dataviz/lineplot.PNG","img/dataviz/sketch.jpg","img/org_visual.png","outputFile.xlsx","references.bib"]}
   </script>
   <!--radix_placeholder_navigation_in_header-->
   <!--/radix_placeholder_navigation_in_header-->
@@ -1478,18 +1480,321 @@ code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
 
 <div class="d-article">
 <h1 id="the-original-visualisation">The original Visualisation</h1>
-<p>Figure 1 below shows the original visualisation for the top six trading countries with Singapore in 2019 to 2020 using the data provided by Department of Statistics, Singapore (DOS).</p>
+<p>Figure <a href="#fig:original-visualisation">1</a> below shows the original visualisation for the top six trading countries with Singapore in 2019 to 2020 using the data provided by Department of Statistics, Singapore (DOS).</p>
 <div class="layout-chunk" data-layout="l-body">
-<div class="figure" style="text-align: center"><span id="fig:test"></span>
-<img src="org_visual.png" alt="Original Visualisation" width="1604" />
+<div class="figure" style="text-align: center"><span id="fig:original-visualisation"></span>
+<img src="img/org_visual.png" alt="Original Visualisation" width="1604" />
 <p class="caption">
 Figure 1: Original Visualisation
 </p>
 </div>
 </div>
-<h1 id="critiques-for-the-original-visualisation">Critiques for the original visualisation</h1>
+<h1 id="critiques-for-the-original-visualisation">1. Critiques for the original visualisation</h1>
 <p>Before looking at the visualisation aesthetics and clarity, it is important to have a clear understanding of the context and objective of the visualisation.</p>
+<p>What does merchandise trade constitutes?</p>
+<ul>
+<li>Merchandise Trade is the combination of imports and exports.
+<ul>
+<li>Imports refers to goods brought into Singapore.</li>
+<li>Exports refers to good brought out of Singapore.</li>
+</ul></li>
+<li>How are the top six trading countries with Singapore selected?
+<ul>
+<li>They are selected based on their total summation of imports and exports for year 2020.</li>
+</ul></li>
+<li>How do we measure merchandise trade?
+<ul>
+<li>Merchandise trade is measured in Singapore Dollars (S$).</li>
+</ul></li>
+</ul>
+<h2 id="clarity-of-visualisation">1.1 Clarity of Visualisation</h2>
+<p>Clarity is the visualisation “fit”: How the visualisation matches and tell reality.</p>
+<h3 id="good-points-in-the-visualisation-to-be-kept">1.1.1 Good points in the visualisation to be kept</h3>
+<ol type="1">
+<li>Plotting the graph over time provides temporal information.</li>
+<li>Graph was plotted with “Export” and “Import” data.</li>
+</ol>
+<h3 id="areas-to-be-improved">1.1.2 Areas to be improved</h3>
+<ol type="1">
+<li>Title of visualisation did not mention who the six countries are trading with.</li>
+<li>Subtitle can be added to provide more context and information for the visualisation, such as how the top six countries are selected, which year is used for the calculation and the unit of measurements.</li>
+<li>Lack of aggregated data that determined the ranking and selection of the top six countries.</li>
+<li>Ranking of the countries could present valuable information for the visualisation.</li>
+<li>No caption is included to reference the source of data.</li>
+<li>Different axis intervals and range giving the wrong visual perception:
+<ul>
+<li>Inter-plot x-axis intervals and range are different. Japan plot has a different time period as compared to the other countries.</li>
+<li>Inter-plot y-axis intervals and range for import and exports are different.</li>
+<li>Y-axis label is confusing. The “M” was not explained.</li>
+</ul></li>
+<li>Merchandise trade can be seasonsal and it fluctuates heavily by month. A condensed time frame might be more useful for the visualiation.</li>
+</ol>
+<h2 id="aesthetics-of-visualisation">1.2 Aesthetics of Visualisation</h2>
+<p>Aesthetics is the visualisation “form”: How the visualisation looks.</p>
+<h3 id="good-points-in-the-visualisation-to-be-kept-1">1.2.1 Good points in the visualisation to be kept</h3>
+<ol type="1">
+<li>Individual graph for each country allows comparison between the countries.</li>
+</ol>
+<h3 id="areas-to-be-improved-1">1.2.2 Areas to be improved</h3>
+<ol type="1">
+<li>Title alignment are inconsistent.
+<ul>
+<li>Main title is skewed to the right.</li>
+<li>Individual titles are skewed to the left.</li>
+<li>Main title font size is smaller than individual plots title.</li>
+</ul></li>
+<li>Color fill under the curve does not bring any value. Furthermore, the overlapping colors are confusing for readers to read and interpret.</li>
+<li>Annotation can be added on the graphs to tell the story more effectively.</li>
+</ol>
+<h1 id="alternative-data-visualisation">2. Alternative Data Visualisation</h1>
+<p>From Ben’s <span class="citation" data-cites="clarity_aesthetics">(Jones <a href="#ref-clarity_aesthetics" role="doc-biblioref">2012</a>)</span> Data Visualisation chart of Clarity vs. Aesthetics shown in Figure <a href="#fig:clarity-aesthetics">2</a>, the current visualisation would fall under Quadrant III and the proposed visualisation would aim to be in Quadrant I.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:clarity-aesthetics"></span>
+<img src="img/clarity_aesthetics_chart.jpg" alt="Aesthetics against Clarity chart"  />
+<p class="caption">
+Figure 2: Aesthetics against Clarity chart
+</p>
+</div>
+</div>
+<p>To improve the visualisation, the time series could be changed to yearly instead of monthly. Merchandise trade of each country fluctuates heavily and certain goods are seasonal. Utilising a monthly interval for the x-axis clutters the graph with the line plot peak and trough that might not provide useful information. Aggregating the data into years might be clearer for interpretation for the change over year.</p>
+<p>An additional plot can be added to summarize and rank the top 6 countries. This plot will display include the context of the top six country are selected based on the total trade in 2020. The bar plot can also be arranged in descending order to showcase the ranking of the six countries.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:sketch"></span>
+<img src="img/dataviz/sketch.jpg" alt="Sketch of alternative visualisation"  />
+<p class="caption">
+Figure 3: Sketch of alternative visualisation
+</p>
+</div>
+</div>
+<p>Figure <a href="#fig:sketch">3</a> would be an alternative presentation of the visualisation.</p>
+<ul>
+<li>The title will be renamed to provide more context to understand the visualisation</li>
+<li>Subtitle will be added to provide background information on the context</li>
+<li>The line plot concept will be retained on the left of the visualisation.
+<ul>
+<li>The x-axis will be changed to year instead of months to aggregate the data.</li>
+<li>The y-axis title to include the units of measurement (S$).</li>
+<li>Line plot to be stacked horizontally with same y-axis marks for comparison of trade value between the 6 countries.</li>
+<li>Additional line of total trade (sum of import and export) to be included in the graph.</li>
+</ul></li>
+<li>Additional horizontal bar plot to be added to the right of the visualisation.
+<ul>
+<li>The bar plot will indicate the total trade in 2020.</li>
+<li>Include the title and context for the bar plot.</li>
+<li>Other than the 6 country, include an additional variable <em>Others</em> to group the remaining countries.</li>
+<li>Change the color for the bar plot to <span style="color:green">green</span> to align to the line plot.</li>
+</ul></li>
+<li>Include caption to indicate the dataset source and date.</li>
+<li>Include footer if necessary to indicate any special information.</li>
+</ul>
+<h1 id="proposed-data-visualisation-using-tableau">3. Proposed Data Visualisation using Tableau</h1>
+<p>The dataset used was retrieved from <a href="https://www.singstat.gov.sg/">Deparment of Statistics Singapore</a> under the sub-section of <a href="https://www.singstat.gov.sg/find-data/search-by-theme/trade-and-investment/merchandise-trade/latest-data">Merchandise Trade by Region/Market</a>. <a href="https://www.tableau.com/products/prep">Tableau Prep Builder 2021.1</a> software is used for data preparation and <a href="https://www.tableau.com/">Tableau 2021.1</a> is used for data visualisation.</p>
+<h2 id="data-preparation">3.1 Data Preparation</h2>
+<p>Upload the dataset into Tableau Prep Builder.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:import-step1"></span>
+<img src="img/dataprep/import_step1.PNG" alt="Load the Import worksheet" width="692" />
+<p class="caption">
+Figure 4: Load the Import worksheet
+</p>
+</div>
+</div>
+<p><strong>Refer to Figure <a href="#fig:import-step1">4</a> to import the dataset by following the steps below.</strong> <br /> 1. Tick the box circled in <span style="color:red">red</span> on the left. This option allows the Tableau Prep Builder to perform preliminary cleaning of the data. <br /> 2. Drag the <em>T1</em> worksheet in <span style="color:orange">orange</span> into the middle box. <br /> 3. Change the name in <span style="color:green">green</span> to <em>Import</em>. <br /> 4. Click the + button and create a <em>Clean Step</em> node in <span style="color:purple">purple</span>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:import-step2"></span>
+<img src="img/dataprep/import_step21.PNG" alt="Exclude the rows for regions" width="611" />
+<p class="caption">
+Figure 5: Exclude the rows for regions
+</p>
+</div>
+</div>
+<p><strong>Refer to Figure <a href="#fig:import-step2">5</a> to exclude the rows for regions and total imports by following the steps below.</strong> <br /> 1. Select the first 7 rows (<em>Total Merchandise Imports, America, Asia, Europe, Oceania, Africa, European Union</em>) in <span style="color:red">red</span> from the <em>Variables</em> column and click the <em>Exclude</em> button in <span style="color:orange">orange</span>. <br /></p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:import-step3"></span>
+<img src="img/dataprep/import_step3.PNG" alt="Pivot Date into row" width="634" />
+<p class="caption">
+Figure 6: Pivot Date into row
+</p>
+</div>
+</div>
+<p><strong>Refer to Figure <a href="#fig:import-step3">6</a> to pivot the Months from the columns into rows.</strong> <br /> 1. Select the + button and create a <em>Pivot</em> node in <span style="color:red">red</span>. <br /> 2. Drag all the months column header and drop to the <em>Pivoted Fields</em> section as per the <span style="color:orange">orange arrow</span>. <br /> 3. Rename the column headers to <em>Date, Import and Country</em> accordingly in <span style="color:blue">blue box</span>. <br /> 4. Change the data type of <em>Date</em> column to <em>Date</em> in <span style="color:green">green</span>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:import-step4"></span>
+<img src="img/dataprep/import_step4.PNG" alt="Clean column header and label data type" width="545" />
+<p class="caption">
+Figure 7: Clean column header and label data type
+</p>
+</div>
+</div>
+<p><strong>Refer to Figure <a href="#fig:import-step4">7</a> to aggregrate the import by year</strong> <br /> 1. Select the + button and create a <em>Aggregate</em> node in <span style="color:red">red</span>. <br /> 2. Drag column <em>Country</em> and <em>Date</em> and drop them in <em>Grouped Fields</em> as per the <span style="color:orange">orange arrow</span>. <br /> 3. Drag column <em>Import</em> and drop it in <em>Aggregated Fields</em> as per the <span style="color:green">green arrow</span> to aggregate the sum of import by year. <br /> 3. <em>Group</em> the column <em>Date</em> by <em>Year</em> following the steps in the <span style="color:blue">blue boxes</span>. <br /></p>
+<p><strong>Repeat the steps from Figure <a href="#fig:import-step1">4</a> to Figure <a href="#fig:import-step4">7</a> for Export using the <em>T2</em> worksheet.</strong></p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:import-step5"></span>
+<img src="img/dataprep/import_step51.PNG" alt="Join both tables" width="551" />
+<p class="caption">
+Figure 8: Join both tables
+</p>
+</div>
+</div>
+<p><strong>Refer to Figure <a href="#fig:import-step5">8</a> to Join both table</strong> <br /> 1. Drag the <em>Aggregate 3</em> node from <em>T2</em> flow to the + button on the right of <em>T1</em> flow as shown in the <span style="color:red">red arrow</span> in Figure <a href="#fig:import-step5">8</a>. <br /> 2. Add two <em>Applied Join Clauses</em> to match <em>Date</em> and <em>Country</em> shown in <span style="color:orange">orange box</span>. <br /> 3. Select the <em>Join Type</em> to <em>full</em> in the <span style="color:green">green box</span>. <br /> 4. Select the columns <em>Country(Country-1)</em> and <em>Date(Date-1)</em> and <em>Remove Fields</em> in the <span style="color:blue">blue box</span>. These are duplicate or repeated columns after performing the <em>Join</em>.</p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:import-step6"></span>
+<img src="img/dataprep/import_step61.PNG" alt="Create new column for total sum of export and import" width="536" />
+<p class="caption">
+Figure 9: Create new column for total sum of export and import
+</p>
+</div>
+</div>
+<p><strong>Refer to Figure <a href="#fig:import-step6">9</a> to create new column for total sum of export and import</strong> <br /> 1. Select the <em>Create Calculated Field</em> button in <span style="color:red">red</span>. <br /> 2. Change the <em>Field Name</em> to <em>Total</em> in <span style="color:orange">orange</span>. <br /> 3. Input the equation of <em>[Export] + [Import]</em> in <span style="color:green">green</span> and save the new column. <br /></p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:import-step7"></span>
+<img src="img/dataprep/import_step71.PNG" alt="Pivot the Export, Import and Total columns" width="548" />
+<p class="caption">
+Figure 10: Pivot the Export, Import and Total columns
+</p>
+</div>
+</div>
+<p><strong>Refer to Figure <a href="#fig:import-step7">10</a> to Pivot the columns</strong> <br /> 1. Create a new <em>Pivot</em> node in the <span style="color:red">red box</span>. <br /> 2. Drag and drop the columns <em>Export, Import</em> and <em>Total</em> into the <em>Pivoted Fields</em> in <span style="color:orange">orange</span>. <br /></p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:import-step8"></span>
+<img src="img/dataprep/import_step81.PNG" alt="Output into csv" width="575" />
+<p class="caption">
+Figure 11: Output into csv
+</p>
+</div>
+</div>
+<p><strong>Refer to Figure <a href="#fig:import-step8">11</a> to Ouput file into csv</strong> <br /> 1. Create a new <em>Ouput</em> node in the <span style="color:red">red box</span>. <br /> 2. Select the <em>Browse</em> button to change the directory and filename and change the <em>Output type</em> to <em>Comma Separated Values (.csv)</em> in <span style="color:orange">orange</span>. <br /></p>
+<h2 id="data-visualisation">3.2 Data Visualisation</h2>
+<p>The data prepared earlier is uploaded into Tableau for Visualisation.</p>
+<h3 id="create-line-plot-for-the-6-countries">3.2.1 Create line plot for the 6 countries</h3>
+<p>The data contains all countries that trades with Singapore from 1976 to 2021. Hence, the columns <em>Year</em> and <em>Country</em> is added to the <em>Filter</em> section on the worksheet to align with the original visualisation parameters. Refer to step 1 and 2 together with Figure <a href="#fig:viz-step1">12</a> to filter the 6 countries for 2019 and 2020. <br /></p>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:viz-step1"></span>
+<img src="img/dataviz/filter.PNG" alt="Filter the Country and Year" width="706" />
+<p class="caption">
+Figure 12: Filter the Country and Year
+</p>
+</div>
+</div>
+<ol type="1">
+<li>Filter <em>Year</em> to select 2019 and 2020. <br /></li>
+<li>Filter <em>Country</em> to select the 6 countries, <em>Mainland China, Malaysia, United States, Taiwan, Hong Kong</em> and <em>Japan</em>. <br /></li>
+</ol>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:viz-lineplot-1"></span>
+<img src="img/dataviz/lineplot-1.PNG" alt="Dual axis and sychronize of dual y-axis" width="527" />
+<p class="caption">
+Figure 13: Dual axis and sychronize of dual y-axis
+</p>
+</div>
+</div>
+<ol start="3" type="1">
+<li>Create line plot by adding <em>Country</em> and <em>Date</em> to the Columns section and two <em>Trade value</em> node to Rows section.</li>
+<li>Set one <em>Trade value</em> to a Line graph and the other <em>Trade value</em> to a Shape type. Right click the second node and select <em>Dual Axis</em> and Synchronize the secondary y-axis as in Figure <a href="#fig:viz-lineplot-1">13</a>. This allows the graph aesthetics to be more customisable with the size and shape.</li>
+<li>Add the <em>Trade type</em> to the <em>Color</em> tab to separate the line to <em>Export</em>, <em>Import</em> and <em>Total</em>.</li>
+<li>Right click the the secondary dual y-axis on the right and uncheck the <em>Show Header</em> option to remove the y-axis. As the secondary y-axis is of the same interval as the primary y-axis on the left, there is no value is displaying it.</li>
+<li>Rename the y-axis to <em>Trade Value (S$)</em>.</li>
+<li>Change the Title of the graph to <em>Merchandise Trade of Top Six Trading Countries with Singapore from 2019 to 2020, (S$)</em>.</li>
+<li>Annotate increase or decrease of total trade in percentage as shown in Figure <a href="#fig:viz-lineplot-2">14</a>.</li>
+<li>Annotate unique insights on the graph as shown in Figure <a href="#fig:viz-lineplot-2">14</a>. For example, indicating strong increase or decrease of the import or export on the graph.</li>
+</ol>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:viz-lineplot-2"></span>
+<img src="img/dataviz/lineplot-2.PNG" alt="Final Line Plot" width="828" />
+<p class="caption">
+Figure 14: Final Line Plot
+</p>
+</div>
+</div>
+<h3 id="create-bar-chart-for-the-6-countries-in-2020">3.2.2 Create Bar Chart for the 6 countries in 2020</h3>
+<ol type="1">
+<li>Create a <em>Bar</em> chart in a new worksheet</li>
+</ol>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:viz-barchart-1"></span>
+<img src="img/dataviz/barchart-1.PNG" alt="Create new Variable for other countries" width="496" />
+<p class="caption">
+Figure 15: Create new Variable for other countries
+</p>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Right click <em>Country</em> and <em>Create</em> a new <em>Set</em> as per the top left example in Figure <a href="#fig:viz-barchart-1">15</a>.</li>
+<li>Name the set <em>top6country</em> and select the 6 countries from the list as per the top right example in Figure <a href="#fig:viz-barchart-1">15</a>.</li>
+<li>In the <em>Analysis</em> toolbar, select <em>Create Calculated Field</em>.</li>
+<li>Enter the logic sequence shown at the bottom of Figure <a href="#fig:viz-barchart-1">15</a> and name the variable <em>Others</em>. This creates a new variable where the 6 countries are named as usual and the other countries will be combined into the dummy variable called <em>Others</em>.</li>
+<li>Filter <em>Date</em> variable to show only 2020.</li>
+<li>Filter <em>Trade type</em> to show only <em>Total</em>.</li>
+<li>Insert variable <em>Others</em> to the Rows and <em>Trade Value</em> to the Columns on the bar chart worksheet.</li>
+<li>Insert <em>Others</em> to the Color and <em>Trade Value</em> to Label and change the calculation to <em>Percent of Total</em>. This shows the proportion of total trade value for each country over Singapore’s total trade value in 2020.</li>
+<li>Edit the bar colors to <span style="color:green">green</span> to align to the Line plot <em>Total</em> color. Set the <em>Others</em> to <span style="color:grey">grey</span> color to better differentiate the countries apart.</li>
+<li>Change the Title to <em>Total Merchandise Trade of Singapore in 2020, (S$)</em>.</li>
+<li>Change the x-axis title to <em>Trade Value (S$)</em>.</li>
+</ol>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:viz-barchart-2"></span>
+<img src="img/dataviz/barchart-2.PNG" alt="Final Bar Chart (2020)" width="827" />
+<p class="caption">
+Figure 16: Final Bar Chart (2020)
+</p>
+</div>
+</div>
+<h3 id="create-dashboard">3.2.3 Create Dashboard</h3>
+<ol type="1">
+<li>Create a new Dashboard.</li>
+</ol>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:viz-dashboard-1"></span>
+<img src="img/dataviz/dashboard-1.PNG" alt="Dashboard wireframe" width="835" />
+<p class="caption">
+Figure 17: Dashboard wireframe
+</p>
+</div>
+</div>
+<ol start="2" type="1">
+<li>Setup the wireframe for the dashboard by referring to Figure <a href="#fig:viz-dashboard-1">17</a> and the following steps.
+<ul>
+<li>Change the dashboard <em>Size</em> to <em>Automatic</em> boxed in <span style="color:red">red</span> in Figure <a href="#fig:viz-dashboard-1">17</a>.</li>
+<li>Check the option for <em>Show dashboard title</em> boxed in <span style="color:red">red</span> to display the Title in Figure <a href="#fig:viz-dashboard-1">17</a> subsection <strong>1</strong>.</li>
+<li>Insert <em>Horizontal</em> and <em>Vertical</em> objects as shown in Figure <a href="#fig:viz-dashboard-1">17</a> for section 2 to 6.</li>
+</ul></li>
+<li>Drag and drop the line plot worksheet <em>Trade</em> to sub section 3 in Figure <a href="#fig:viz-dashboard-1">17</a>.</li>
+<li>Change line plot <em>Legend</em> to floating and re-position it on top of the line plot.</li>
+<li>Drag and drop the bar chart worksheet <em>BarChart2020</em> to sub section 4 in Figure <a href="#fig:viz-dashboard-1">17</a>.</li>
+<li>Remove the <em>Legend</em> container as the country name is represented on the y-axis.</li>
+<li>Change the Title of the dashboard</li>
+<li>Add subtitle to provide context for visualisation.</li>
+<li>Add caption to include source and date of data.</li>
+<li>Add footer to include the metadata definition and exclusion of data.</li>
+</ol>
+<div class="layout-chunk" data-layout="l-body">
+<div class="figure" style="text-align: center"><span id="fig:viz-dashboard-2"></span>
+<img src="img/dataviz/dashboard-2.PNG" alt="Final Dashboard" width="960" />
+<p class="caption">
+Figure 18: Final Dashboard
+</p>
+</div>
+</div>
+<p><strong>The final visualisation is available on my <a href="https://public.tableau.com/app/profile/lim.yong.kai/viz/dataviz1_16221835935250/FinalDashboard">Tableau Public</a> page.</strong></p>
+<h1 id="insights-from-visualisation">4.0 Insights from visualisation</h1>
+<p>There is a saying: “Statistics are like bikinis. What they reveal is suggestive, but what they conceal is vital.” Visualisation should be designed to be factual and clear for interpretation.</p>
+<p>COVID-19 was an unprecedented event in 2020 which led to countries locking down their cities or closing their borders globally and Singapore is no exception. Trade is integral to Singapore’s success and the decrease in trade activities in 2020 was a major impact on it’s growth. However, the makeover from the original visualisation showed meaningful insights for interpretation.</p>
+<p>A positive trade balance is termed when Singapore export value is greater than import value with a country. This signifies an inflow of cash to Singapore from the country. Conversely, an negative trade balance is termed when Singapore import value is greater than export value with a country. This signifies an outflow of cash from Singapore to the country.</p>
+<ol type="1">
+<li><p>The total trade value with Malaysia fell 8.4% for 2020, the worst decrease among the six countries. The Import value with Malaysia was similar for 2020 whereas the Export value took a major hit and fell by 18.2% from 2019. This resulted in a negative trade balance with Malaysia in 2020.</p></li>
+<li><p>The total trade with the United States marginally fell by 2.5%. However, there was a large change in Export (grew 19.2%) and Import (fell 18.9%) in 2020. In 2019, Singapore had a negative trade balance with the United States and it was the reversed in 2020 where there was a positive trade balance.</p></li>
+<li><p>Trade with Taiwan performed the best among the six countries where the total trade value grew by 13.0% in 2020. Both export and import grew significantly in 2020.</p></li>
+<li><p>Hong Kong is the fifth largest trade country with Singapore among the six country. Interestingly, the export is much larger than import where exports is around 90% of the total trade value.</p></li>
+<li><p>Mainland China and Japan total trade value had marginal change. Imports and exports are also consistent and equal in 2020.</p></li>
+<li><p>The top six countries total trade stands at around 57% of Singapore’s total trade in 2020.</p></li>
+</ol>
+<p>In light of COVID-19 pandemic affecting countries economy, the changes in trade might be unique in 2020. A better representation would be to use a longer time frame to show the general trend of the trade value.</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r distill-force-highlighting-css"><code class="sourceCode r"></code></pre></div>
+<div id="refs" class="references" role="doc-bibliography">
+<div id="ref-clarity_aesthetics">
+<p>Jones, Ben. 2012. “Data Visualization: Clarity or Aesthetics?” 2012. <a href="https://dataremixed.com/2012/05/data-visualization-clarity-or-aesthetics/">https://dataremixed.com/2012/05/data-visualization-clarity-or-aesthetics/</a>.</p>
+</div>
+</div>
 <!--radix_placeholder_article_footer-->
 <!--/radix_placeholder_article_footer-->
 </div>
@@ -1501,7 +1806,10 @@ Figure 1: Original Visualisation
 <!--radix_placeholder_site_after_body-->
 <!--/radix_placeholder_site_after_body-->
 <!--radix_placeholder_appendices-->
-<div class="appendix-bottom"></div>
+<div class="appendix-bottom">
+<h3 id="references">References</h3>
+<div id="references-listing"></div>
+</div>
 <!--/radix_placeholder_appendices-->
 <!--radix_placeholder_navigation_after_body-->
 <!--/radix_placeholder_navigation_after_body-->
