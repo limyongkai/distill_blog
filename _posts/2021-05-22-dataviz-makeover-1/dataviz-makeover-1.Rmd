@@ -3,7 +3,7 @@ title: "DataViz Makeover 1"
 description: |
   DataViz Makeover 1
 author:
-  - name: Lim Yong Kai 
+  - name: Yong Kai Lim
     url: https://limyongkai.netlify.app/
     affiliation: Singapore Management University
 date: 05-29-2021
