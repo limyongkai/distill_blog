@@ -3,7 +3,7 @@ title: "DataViz Makeover 1"
 description: |
   DataViz Makeover 1
 author:
-  - name: Yong Kai Lim 
+  - name: Lim Yong Kai 
     url: https://limyongkai.netlify.app/
     affiliation: Singapore Management University
 date: 05-29-2021
@@ -57,9 +57,9 @@ Clarity is the visualisation **"Fit"**: How the visualisation matches and tell r
 5. No caption is included to reference the source of data.
 6. Different axis intervals and range giving the wrong visual perception:
     + Inter-plot x-axis intervals and range are different. Japan plot has a different time period as compared to the other countries.
-    + Inter-plot y-axis intervals and range for import and exports are different. 
+    + Inter-plot y-axis intervals and range for import and exports are different, making it difficult to compare between the six countries.
     + Y-axis label is confusing. The "M" was not explained.
-7. Merchandise trade can be seasonsal and it fluctuates heavily by month. A condensed time frame might be more useful for the visualiation. 
+7. Merchandise trade can be seasonal and it fluctuates heavily by month. A condensed time frame might be more useful for the visualiation. 
 
 ## 1.2 Aesthetics of Visualisation
 Aesthetics is the visualisation **"Form"**: How the visualisation looks.
@@ -160,8 +160,8 @@ knitr::include_graphics("img/dataprep/import_step51.png")
 
 **Refer to Figure \@ref(fig:import-step5) to Join both table** <br />
 1. Drag the *Aggregate 3* node from *T2* flow to the + button on the right of *T1* flow as shown in the <span style="color:red">red arrow</span> in Figure \@ref(fig:import-step5). <br />
-2. Add two *Applied Join Clauses* to match *Date* and *Country* shown in <span style="color:orange">orange box</span>. <br />
-3. Select the *Join Type* to *full* in the <span style="color:green">green box</span>. <br />
+2. Add two *Applied Join Clauses* to match variables *Date* and *Country* shown in <span style="color:orange">orange box</span>. <br />
+3. Select the *Join Type* to *full* in the <span style="color:green">green box</span> to include all countries into the final list. <br />
 4. Select the columns *Country(Country-1)* and *Date(Date-1)* and *Remove Fields* in the <span style="color:blue">blue box</span>. These are duplicate or repeated columns after performing the *Join*.  
 
 ```{r import-step6, layout="l-body-outset", fig.align = 'center', fig.cap = 'Create new column for total sum of export and import', echo=FALSE}
@@ -207,14 +207,31 @@ knitr::include_graphics("img/dataviz/lineplot-1.png")
 3. Create line plot by adding *Country* and *Date* to the Columns section and two *Trade value* node to Rows section.
 4. Set one *Trade value* to a Line graph and the other *Trade value* to a Shape type. Right click the second node and select *Dual Axis* and Synchronize the secondary y-axis as in Figure \@ref(fig:viz-lineplot-1). This allows the graph aesthetics to be more customisable with the size and shape. 
 5. Add the *Trade type*  to the *Color* tab to separate into 3 lines: *Export*, *Import* and *Total*.
-6. Right click the the secondary dual y-axis on the right and uncheck the *Show Header* option to remove the y-axis. As the secondary y-axis is of the same interval as the primary y-axis on the left, there is no value is displaying it.
-7. Rename the y-axis to *Trade Value (S$)*.
-8. Change the Title of the graph to *Merchandise Trade of Top Six Trading Countries with Singapore from 2019 to 2020, (S$)*.
-9. Annotate increase or decrease of total trade in percentage as shown in Figure \@ref(fig:viz-lineplot-2).
-9. Annotate unique insights on the graph as shown in Figure \@ref(fig:viz-lineplot-2). For example, indicating strong increase or decrease of the import or export on the graph.
+6. Change the *Total* line color to <span style="color:green">green</span> to signify the total summation of import and export.
+7. Right click the the secondary dual y-axis on the right and uncheck the *Show Header* option to remove the y-axis. As the secondary y-axis is of the same interval as the primary y-axis on the left, there is no value is displaying it.
+8. Rename the y-axis to *Trade Value (S$)*.
+9. Change the Title of the graph to *Merchandise Trade of Top Six Trading Countries with Singapore from 2019 to 2020, (S$)*.
 
-```{r viz-lineplot-2, layout="l-page", fig.align = 'center', fig.cap = 'Final Line Plot', echo=FALSE}
+```{r viz-lineplot-2, layout="l-page", fig.align='center', fig.cap = 'Creating dummy variables and annotate YoY', echo=FALSE}
 knitr::include_graphics("img/dataviz/lineplot-2.png")
+```
+10. Annotate the Year-on-Year change from 2019 to 2020 on the *Total* line to show the change in percentage. The numbers is set to <span style="color:red">red</span> to indicate negative growth and <span style="color:green">green</span> to indicate positive growth. To allow repeatability in annotating the number and colors for the dashboard, five dummy variables are created as shown in Figure \@ref(fig:viz-lineplot-2).
+    + *percent+* and *percent-* to indicate the positive and negative growth year-on-year in percentage. The logic sequence is in subsection **1** in Figure \@ref(fig:viz-lineplot-2).
+    + *arrow+* and *arrow+* to show an upward pointing triangle for positive growth and downward pointing triangle for negative growth respectively. The logic sequence is in subsection **2** in Figure \@ref(fig:viz-lineplot-2).
+    + *Verb* to output the word **grew** or **fell** depending if the year-on-year change is positive or negative respectively. The logic sequence is in subsection **3** in Figure \@ref(fig:viz-lineplot-2). 
+    + Right click the <span style="color:green">green circle</span> for Total sales in 2020 and add *Annotate -> Mark*.
+    + Include the annotation description in Figure \@ref(fig:viz-lineplot-2) subsection 4. Change the color for positive change to <span style="color:green">green</span> and negative change to <span style="color:red">red</span>.
+    
+```{r viz-lineplot-3, layout="l-body-outset", fig.align='center', fig.cap = 'Annotate unique insights', echo=FALSE}
+knitr::include_graphics("img/dataviz/lineplot-3.png")
+```
+
+11. Annotate unique insights such as strong increase or decrease of the import or export on the graph. The annotation description is shown in Figure \@ref(fig:viz-lineplot-3) and change the color similar to step 10 for *Total* change.
+
+The final line plot is shown in Figure \@ref(fig:viz-lineplot-4).
+
+```{r viz-lineplot-4, layout="l-page", fig.align='center', fig.cap = 'Final line plot', echo=FALSE}
+knitr::include_graphics("img/dataviz/lineplot-4.png")
 ```
 
 ### 3.2.2 Create Bar Chart for the 6 countries in 2020
