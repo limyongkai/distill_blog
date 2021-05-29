@@ -1,6 +1,7 @@
 name: "Yong Kai"
 title: "Yong Kai"
 base_url: "https://limyongkai.netlify.app/"
+google_analytics: "G-GPHE66WCS6"
 theme: theme.css
 description: "My Blog"
 output_dir: "_site"
