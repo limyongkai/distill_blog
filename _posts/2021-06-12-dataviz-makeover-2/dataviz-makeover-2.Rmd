@@ -325,7 +325,7 @@ knitr::include_graphics("img/dataviz/dashboard-3.png")
 
 The final interactive visualisation is available on my [Tableau Public](https://public.tableau.com/app/profile/lim.yong.kai/viz/viz2_16238675163570/Dashboard5) page.
 
-```{r}
+```{r , layout="l-page"}
 knitr::include_url("https://public.tableau.com/app/profile/lim.yong.kai/viz/viz2_16238675163570/Dashboard5")
 ```
 
