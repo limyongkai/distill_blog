@@ -15,7 +15,7 @@ output:
 bibliography: references.bib
 font-family: sans serif
 mainfont: \usepackage[T1]{fontenc}
-
+preview: img/dataviz/dashboard-2.png
 ---
 
 ```{r setup, include=FALSE}
