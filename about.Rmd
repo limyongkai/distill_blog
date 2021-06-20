@@ -1,14 +1,38 @@
 ---
-title: "About Me!"
+title: About Yong Kai~
 site: distill::distill_website
-description: |
-  Getting to know Yong Kai~. 
+output:
+  distill::distill_article:
+    self_contained: false
+    theme: lumen
+    font-size: 48px 
 ---
-# To be Updated later~~~
-```{r load_packages, message=FALSE, warning=FALSE, include=FALSE} 
-library(fontawesome)
-fa(name = "r-project", fill = "steelblue")
-```
+### Some of the Software and skills I am learning~ 
+[![r](img/R.png){width=80px}](https://www.r-project.org/)
 
-# `r fa("r-project", fill = "steelblue", height="10em", width="10em", position="centre")`
-...and works equally well within inline text: `r fa("r-project", fill = "steelblue")`.
+* Data manipulation and transformation using *tidyverse*
+* Visualisation using *ggplot* and *shiny* application
+* Confirmatory Data Analysis using statistical tests
+* Predictive Analytics with Regression models<br />
+
+[![python](img/python.png){width=180px}](https://www.python.org/)
+
+* Data manipulation and transformation using *numpy*
+* Visualisation using *ggplot* and *seaborn*
+
+[![jmp](img/jmp.png){width=80px}](https://www.jmp.com/en_us/software/predictive-analytics-software.html)
+
+#### JMP Pro, SAS
+* Exploratory and Confirmatory Data Analysis using statistical test
+* Clustering analysis with Hierarchical, K-means and latent class analysis algorthims
+
+[![em](img/EM.png){width=80px}](https://www.sas.com/en_sg/software/enterprise-miner.html)
+
+#### SAS Enterprise Miner
+* Regression and Recursive partitioning modeling
+* Time series analysis (Dynamic Time Warping)
+
+[![tableau](img/tableau.png){width=220px}](https://www.tableau.com/)
+
+* Visusalisation using interactive dashboards
+

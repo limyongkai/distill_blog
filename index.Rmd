@@ -1,5 +1,5 @@
 ---
-title: "Hi"
+title: "Lim Yong Kai Blog"
 site: distill::distill_website
 font-size: 64px
 ---
@@ -27,4 +27,4 @@ Master of IT in Business Student at Singapore Management University
 
 # Hello!
 
-I am a student pursuing my Master of IT in Business at Singapore Management University.
+I am a student pursuing my Master of IT in Business at Singapore Management University. Graduating with a bachelor in Mechanical Engineering, I am embarking on a new journey into the Data Science industry. As an aspiring Data Scientist, I want to utilize my analytical acumen to find solutions and translate them into actionable insights using data.

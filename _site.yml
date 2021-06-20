@@ -32,4 +32,3 @@ output:
     includes:
       in_header: "_utterances.html"
       after_body: "_after_body.html"
-
