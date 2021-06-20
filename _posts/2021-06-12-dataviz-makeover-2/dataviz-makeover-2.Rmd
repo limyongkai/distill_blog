@@ -137,7 +137,7 @@ knitr::include_graphics("img/dataprep/import_step4.png")
 
 **Refer to Figure \@ref(fig:import-step4) to remove the unwanted rows** 
 
-1. Exclude the rows whose country are as follows:
+1. Exclude the rows whose markets are named as follows:
 * Total Merchandise Imports(Thousand Dollars)
 * America(Million Dollars)
 * Asia(Million Dollars)
@@ -145,7 +145,7 @@ knitr::include_graphics("img/dataprep/import_step4.png")
 * Oceania(Million Dollars)
 * Africa(Million Dollars)
 
-2. As these variables does not reflect the market but the summation and continents, we exclude them prior to our analysis.
+2. As these variables does not reflect the market but the total summation or continents, we exclude them prior to our analysis.
 
 **Repeat the steps from Figure \@ref(fig:import-step1) to Figure \@ref(fig:import-step4) for Export using the *T2* worksheet.**
 
@@ -176,7 +176,7 @@ knitr::include_graphics("img/dataprep/import_step7.png")
 ## 3.2 Data Visualisation
 The data prepared earlier is uploaded into Tableau for Visualisation.
 
-### 3.2.1 Create line plot for the 6 countries
+### 3.2.1 Create bubble plot for the 6 countries
 The data contains import and export trade value of different markets from 1976 to 2021. Each market has the import and export value represented in different denomination. For example, *European Union* values is in *Million Dollars* whereas China is in *Thousand Dollars*. Hence, dummy variables will be created for import and export values by factoring in denomination.
 
 ```{r viz-step1, layout="l-body-outset", fig.align='center', fig.cap='Create Calculated field for import and export', echo=FALSE}
@@ -187,26 +187,26 @@ knitr::include_graphics("img/dataviz/viz-step1.png")
 2. Create a dummy variable *dImport* to tabulate the actual import value of the market factoring in the denomination.
 3. Create a dummy variable *dExport* to tabulate the actual export value of the market factoring in the denomination.
 4. Create a variable *Total* to tabulate the sum of export and import of the market.
+5. Create a variable *Ref_line* to draw the diagonal line across the plot. This will separate the region into two halves representing Net Exporter and Net Importer.
 
 ```{r viz-step-2, fig.align='center', fig.cap='Create Calculated field for Net Export and Import', echo=FALSE}
 knitr::include_graphics("img/dataviz/viz-step2.png")
 ```
 
-5. Create a variable *NetExport* to tabulate the net export value if the market total export value is more than their total import value for the year. This variable will only display values if the market has an net export value, else the variable will be empty for the market.
-6. Create a variable *NetImport* to tabulate the net import value if the market total import value is more than their total export value for the year. This variable will only display values if the market has an net import value, else the variable will be empty for the market.
-7. Create a variable *export_import_word* to display the string *net export* or *net import* depending on the markets value. This variable will be used in the tooltip description to reflect the market trade position. This variable will also be used in the barplot color to differentiate the market as a net exporter or net importer.
-8. Create a variable *Ref_line* to plot the diagonal line across the plot. This will separate the region into two halves representing Net Exporter and Net Importer.
+6. Create a variable *NetExport* to tabulate the net export value if the market total export value is more than their total import value for the year. This variable will only display values if the market has an net export value, else the variable will be empty for the market.
+7. Create a variable *NetImport* to tabulate the net import value if the market total import value is more than their total export value for the year. This variable will only display values if the market has an net import value, else the variable will be empty for the market.
+8. Create a variable *export_import_word* to display the string *"net export"* or *"net import"* depending on the markets value. This variable will be used in the tooltip description to reflect the market trade position. This variable will also be used in the barplot color to differentiate the market as a net exporter or net importer.
 
 ```{r viz-step-3, layout="l-page", fig.align='center', fig.cap = 'Bubble plot parameters', echo=FALSE}
 knitr::include_graphics("img/dataviz/viz-step3.png")
 ```
 
 9. Insert *Date* into the *Pages* tab and set it to *Year* as shown in Figure \@ref(fig:viz-step-3) red box.
-10. Insert *Country E* and *Date* into the *Filters* tab as boxed in orange.
+10. Insert *Market* and *Date* into the *Filters* tab as boxed in orange.
 * This will allow the visualisation to be interactive where users can select the markets they wish to be displayed.
 * Select *Range of Dates* as the filter type for the *Date* as boxed in orange.
 * Set the range of dates to start from *1/1/2011* to *1/12/2020* to ensure that the visualisation will only display the time period.
-11. Insert *dExport* to *Columns* and *dImport* and *Ref_line* to Rows as boxed in green.
+11. Insert *dExport* to *Columns* and *dImport* and *Ref_line* to Rows as boxed in green. Set all to *Circle* type in the plot.
 * The *Ref_line* is added to row to display the diagonal line across the plot.
 * Set the *Ref_line* to dual axis and synchronize the axis with the main Y-axis. 
 * Proceed to uncheck the *Show Header* option as there is no value to show the axis.
@@ -226,7 +226,7 @@ knitr::include_graphics("img/dataviz/viz-step5.png")
 
 13.Change the card for *SUM(dImport)* to Shapes and change the shape to map each market to the respective flag.
 
-* Download the flag icon and saved it into your Tableau locale repository. 
+* Download the flag images in circles online and saved it into your Tableau locale repository. 
 * Map the shapes to the flag icons accordingly by selecting shape that is boxed in blue.
 
 14. Change the size of the bubble according to the *Total* trade value for each market.
@@ -238,7 +238,7 @@ knitr::include_graphics("img/dataviz/viz-step5.png")
 18. Check the box for *Show History* and show both *Marks* and *Trails* for *Highlighted* bubbles as boxed in green.
 * Change the opacity for the *Marks* and *Trails* to 50%. This is to reduce cluttering by only giving a lighter shade of trails in the plot.
 * This displays the movement trails of each bubble when the user animate over the years.
-* Only highlighted bubbles will display the trails instead of all bubbles. This reduces cluttering of the plot and the trails will only appear when users specifically selected and highlight those bubbles.
+* Only highlighted or selected bubbles will display the trails instead of all bubbles. This reduces cluttering of the plot and the trails will only appear when users specifically selected and highlight those bubbles.
 
 19. Change the axis name to *Import* and *Export* and format the axis to show the currency and tick marks.
 * Fix the end of each axis to S$83bn. This will ensure that both scales are equal and the diagonal line is at a 45 degree angle.
@@ -257,7 +257,7 @@ knitr::include_graphics("img/dataviz/viz-bubble.png")
 knitr::include_graphics("img/dataviz/viz-step1-1.png")
 ```
 2. Repeat steps 9 and 10 in sub-section 3.1.1 to include the same Filters and Pages.
-3. Add *Market* to Rows and *NewImport* and *NetExport* to Columns.
+3. Add *Market* to Rows and *NetImport* and *NetExport* to Columns.
 4. Change the color of the bar plot to differentiate between Net Import and Net Export value.
 5. Add tooltip comments as per the red box in Figure \@ref(fig:viz-step1-1). This allows interactive information to appear when users hover on the barplot, displaying the market and if the it is a net export or import and the corresponding value.
 6. Change the axis name to *Net Import Value* and *Net Export Value* and format the axis to show the currency and tick marks.
@@ -319,7 +319,7 @@ knitr::include_graphics("img/dataviz/dashboard-3.png")
 
 1. Click *Dashboard* in the toolbar and select *Actions*.
 2. In the *Actions* menu, add action and select *Highlight*
-* This allows selection of markets in the bar plot to be automatically highlight the bubble plot markets and vice versa.
+* This allows selection of markets in the bar plot to automatically highlight the bubble plot markets and vice versa.
 3, Uncheck the *Total* worksheet. 
 * The *Total* worksheet is uncheck because the worksheet has no direct separation of information linked to the markets.
 
@@ -333,17 +333,17 @@ The interactive features of the visualisation are as follows:
 
 1. The dropdown multiple selection filter for markets will update the entire visualisation by changing all 3 plots together.
 2. The dropdown and slider filter for year will change the data and the year in the titles accordingly. 
-3. Highlighting the bubble of each market will show the trail marks of the movement from 2011 to the user selected year.The highlighted markets will also be linked to the bar plot displaying the individual markets net export and net import value.
+3. Highlighting the bubble of each market will show the trail marks of the movement from 2011 to the user selected year. The highlighted markets will also be linked to the bar plot displaying the individual markets net export and net import value and vice versa.
 4. Hovering the cursor over the bubble plot will display the tooltip information on the market export, import and net import or export value in the particular year.
 5. Hovering the cursor over the total export and import bar plot will display the tooltip information on the total export and import value of Singapore with the selected markets in the particular year.
 
 
 # 4.0 Insights from visualisation
-A positive trade balance is termed when Singapore export value is greater than import value with a country. This signifies an inflow of cash to Singapore from other markets Conversely, an negative trade balance is termed when Singapore import value is greater than export value with another market This signifies an outflow of cash from Singapore to the market.
+A positive trade balance is termed when Singapore export value is greater than import value with a country. This signifies an inflow of cash to Singapore from other markets. Conversely, an negative trade balance is termed when Singapore import value is greater than export value with another market This signifies an outflow of cash from Singapore to the market.
 
 1. Import and export values are increasing over the years with China. Export grew from S$49B to S$71B and import grew from S$46B to S$65B from 2011 to 2020. China overtook Malaysia in total trade value in 2013 and has been Singapore's largest trading partner up till 2020. 
-2. Singapore maintain a high net export value with Hong Kong from the 2011 to 2020. This is mainly due to very low import value compared to a much higher proportion in export value.
-3. On the contrary, the value of imports grew at a much faster pace than exports with Taiwan, increasing the net import value value in 2011 to 2020.
+2. Singapore maintain a high net export value with Hong Kong from 2011 to 2020, crowning Hong Kong as the Top Net Importer in 2020. This is mainly due to very low import value compared to a much higher proportion in export value.
+3. On the contrary, the value of imports grew at a much faster pace than exports with Taiwan, increasing the net import value value in 2011 to 2020, crowning Taiwan the Top Net Exporter in 2020.
 4. Exports fell drastically with Indonesia from S$57B to S$30B from 2011 to 2020. However, even with huge fall in export with Indonesia, Indonesia still maintains as an net exporter with Singapore.
 5. United States transited into a net exporter in 2020 after being a net importer from 2011 to 2019. This signifies that Singapore exported more to the United States in 2020.
 6. Over the past five years, Singapore has around S$40B in net exports annually. This positioned Singapore as an net exporter, signifying an inflow of cash to Singapore from other markets. This shows that Singapore balance of trade is in a trade surplus, which is important for Singapore economy who depends heavily on trade to be successful.
