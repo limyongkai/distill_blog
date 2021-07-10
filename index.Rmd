@@ -25,6 +25,6 @@ Master of IT in Business Student at Singapore Management University
 [`r fa("linkedin")`](https://www.linkedin.com/in/yong-kai-lim-a72742137/)
 </div>
 
-# Hello!
+# Hello there!
 
 I am a student pursuing my Master of IT in Business at Singapore Management University. Graduating with a bachelor in Mechanical Engineering, I am embarking on a new journey into the Data Science industry. As an aspiring Data Scientist, I want to utilize my analytical acumen to find solutions and translate them into actionable insights using data.
