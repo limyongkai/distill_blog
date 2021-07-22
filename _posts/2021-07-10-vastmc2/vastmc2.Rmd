@@ -827,3 +827,41 @@ After re-calibrating the GPS coordinates for car id 28, Figure \@ref(fig:map6) s
 From the map in Figure \@ref(fig:map6), the unqiue observation was that car id 28 visited *Ahaggo Museum* on the 18th and 19th of Jan and frequently patronise *Jack's Magical Beans* and *Ouzeri Elian* over the two weeks. 
 
 From the cc transaction table, a search of *Ahaggo Museum* revealed that cc 1286, 7384 and 9241 made transactions on the 18th and 19th of Jan. Next, a search of *Jack's Magical Beans* shows that only cc 9241 out of the three cc made transactions at the location. Lastly, a search of *Ouzeri Elian* on the datatable reveals that cc 9241 made 6 transactions at the location. Hence, we are confident to infer that car id 28 is the owner of cc 9241.
+
+```{r map6, eval=TRUE, echo=TRUE, layout="l-page",fig.height=8, fig.align = 'center', fig.cap = 'Re-calibrated GPS for car id 28'}
+## Map geometry for re-calibrated Car id 28
+gps28 <- gps %>% filter(id==28) %>% 
+  mutate(long = long +0.005,
+         lat=lat-0.002)
+gps_sf28 <- st_as_sf(gps28, coords=c("long","lat"), crs=4326)
+gps_path28 <- gps_sf28 %>% group_by(id) %>% 
+  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
+gps28_pt <- gps_sf28 %>% 
+  group_by(id) %>% arrange(timestamp) %>%
+  mutate(start_diff= as.numeric(timestamp - lag(timestamp,default=first(timestamp)))/60,
+         stop_diff= as.numeric(lead(timestamp)-timestamp)/60,
+         date = as.Date(timestamp)) %>%
+  rename(gps.coord=geometry) %>% 
+  filter(start_diff>5 | stop_diff >5) %>% 
+  mutate(start_vec=ifelse(start_diff>5,1,0), stop_vec=ifelse(stop_diff>5,1,0))
+
+## Plot interactive map
+tmap_mode("view")
+map6<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_path28)+
+  tm_lines() +
+  tm_shape(gps28_pt)+
+  tm_dots(col="blue")
+tmap_leaflet(map6)
+final_tagging <- final_tagging %>% 
+  dplyr::select(last4ccnum, id) %>% 
+  mutate(last4ccnum = as.character(last4ccnum),
+         id = as.character(id)) %>% 
+  bind_rows(c(last4ccnum="9241", id="28"))
+```
+
+Next, we will focus on car id 29 where it matches 90% of cc 3547 transactions and 100% of cc 5921. The high proportion of matches on both credit card warrants some investigation into the data. 
+
+Looking at table 7 for both cc number, we observe that cc 3547 has transactions between 12/01/2014 to 19/01/2014 and cc 5921 has transactions between 06/01/2014 to 10/01/2014. Cross-referencing the GPS data for car id 29 in Figure \@ref(fig:map7), we can observe that the cc transactions matches the GPS data of car id 29. A possible deduction is that the owner of car id 29 used both cc card as there was no overlap in the transaction dates for both cc. Possible scenario could be that the owner switch the CC from 5921 to 3547 after 10/01/2014. However, there might be missing data on 11/01/2014 where it was not captured on both cc. Hence, we will tag car id 29 to both cc 5921 and 3547.
