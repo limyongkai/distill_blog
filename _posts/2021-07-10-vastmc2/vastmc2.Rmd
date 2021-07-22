@@ -733,3 +733,5 @@ knitr::kable(full_tagging, "simple",
 The tagging of the cc and loyalty card numbers to each employee's was based on a best effort basis. It is an non exhaustive list and it requires further validation of data for confirmation of the tagging. The constraints in this methodology was described earlier in this section due to the uncertainties in the dataset.
 
 **Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships.**
+
+test
