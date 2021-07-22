@@ -579,3 +579,226 @@ map3<-tm_shape(bgmap) +
   tm_dots(col="blue", shape=30)
 tmap_leaflet(map3)
 ```
+
+**3. Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
+
+In order to tag the owners of each credit card and loyalty card to the car id, we would need to combine several factors together to triangulate the results. The two conditions that will be used to triangulate the data between the three datasets are:
+
+1. CC transaction timestamp has to be between the time period where the car stopped moving which signify the car reaching its location and the subsequent timestamp that the car starts moving, signifying when the car left the location. By using the stationary GPS stop timestamp and the subsequent GPS timestamp, we can narrow down the selection.
+2. Car stationary GPS coordinates has to be within reasonable radius of the location coordinates.
+
+The locations coordinates would be assigned by referencing the tourist map of Abila. However, from the earlier section, we discovered that the tourist map provided might not be accurate in locating the location coordinates as the icons on the tourist map might not represent the exact coordinates of the location.
+
+Furthermore, the tourist map do not have all the locations marked by its logo which will not allows a full join with the locations in the cc transaction data. Table 5 shows the locations from the cc dataset whose logo could not be located visually on the tourist map of Abila. Ranking the number of transaction at each location in descending order, there are high volume of transactions at those locations and the need to map their GPS coordinate is necessary. 
+
+```{r, echo=TRUE, eval=TRUE }
+## Transactions on 13/01/2014 at "Frydos Autosupply n' More"
+locations <- data.frame(location = cc$location) %>% 
+  group_by(location) %>% summarize(number_transactions=n())
+knitr::kable(locations %>% 
+      dplyr::filter(location == "Abila Zacharo" |
+                    location == "Brewed Awakenings" |
+                    location == "Daily Dealz" |
+                    location == "Hippokampos" |
+                    location == "Kalami Kafenion" |
+                    location == "Kronos Pipe and Irrigation" |
+                    location == "Octavio's Office Supplies" |
+                    location == "Shoppers' Delight" |
+                    location == "Stewart and Sons Fabrication") %>%
+      arrange(desc(number_transactions)), "simple",
+      caption="Table of location with no traceable coordinates") 
+```
+
+Figure \@ref(fig:map4) shows the map marked with blue dots representing the stationary GPS coordinate of all the cars except for each employee house. The popular locations can be determined by the frequency of the blue dots at a particular location on the map. 
+
+Cross referencing with the transactions table, the locations coordinates were tag with their corresponding coordinates by cross-referencing to the car GPS data and geo-referenced data.
+
+```{r map4, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8, fig.align = 'center', fig.cap = 'GPS stationary locations'}
+## Getting coordinates of car stop positions
+first_gps <- gps_stop %>% 
+  group_by(id) %>% 
+  filter(row_number()==1) %>% 
+  ungroup(id)
+gps_pts <- gps_stop %>% ungroup(id) %>%
+  add_row(first_gps) %>% group_by(id) %>% arrange(timestamp) %>%
+  filter(!(start_vec==1 & stop_vec==1)) %>%
+  group_by(id) %>% arrange(timestamp) %>%
+  mutate( start.time = ifelse(start_vec== 0 & stop_vec==0, timestamp, NA),
+          start.time = ifelse(start_vec==1, timestamp,NA),
+          end.time=ifelse(stop_vec==1, timestamp, NA),
+          start.gps = ifelse(start_vec==0 & stop_vec==0, geometry,NA),
+          start.gps = ifelse(start_vec==1, geometry,NA),
+          end.gps=ifelse(stop_vec==1, geometry,NA),
+          end.time = ifelse(start_vec==1, lead(end.time), end.time),
+          end.gps = ifelse(start_vec==1, lead(end.gps), end.gps)) %>%
+  filter(!is.na(start.time))%>%
+  mutate(end.gps = ifelse(end.gps=='NULL',start.gps,end.gps),
+         end.time = ifelse(is.na(end.time),start.time, end.time),
+         start.time= as_datetime(start.time),
+         end.time=as_datetime(end.time),
+         next.start.time=lead(start.time),
+         driving.time=round(difftime(end.time,start.time,units='mins'),2)) %>%
+  dplyr::select(id, date, start.time, end.time, start.gps, end.gps, 
+                next.start.time, driving.time) %>%
+  mutate(start.gps=purrr::map(start.gps, st_point) %>% st_as_sfc(crs=4326))%>%
+  mutate(end.gps=purrr::map(end.gps, st_point) %>% st_as_sfc(crs=4326)) 
+car$CarID <- as_factor(car$CarID)
+gps_pts <- left_join(gps_pts, car, by=c("id"="CarID"))
+gps_stop_points1 <- gps_pts %>%
+  mutate(time.stop = difftime(next.start.time, end.time, units=c("mins")), 
+         time.stop = as.numeric(time.stop))%>% 
+  filter(time.stop < 300) %>% 
+  dplyr::select(id, start.time, start.gps)
+
+## Generate map with the stop positions in blue dots
+tmap_mode("view")
+map_POI<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_stop_points1)+
+  tm_dots(col="blue", shape=30,id="id",
+          popup.vars=c("Car ID"="id", 
+                       "Stationary timestamp" = "start.time", 
+                       "GPS:"="start.gps"))
+tmap_leaflet(map_POI)
+```
+
+The car id are triangulated by tabulating the centroid coordinates of the GPS data from the stationary GPS stop locations from the map. However, there are few limitations by using the methodology mentioned earlier for tagging the owners. 
+
+1. In the earlier section, 4 coffee shops were discovered whose cc transactions timestamp were all at 12:00 but the actual visit time by the employees were in the morning. The inaccuracy of the cc transactions timestamp made it impossible to tag them to the car GPS data.
+2. In the earlier section, the distance between car id 24 GPS stationary coordinates at *Frydos Autosupply n' More* was 500 metres away. Locations might not have their dedicated carpark right next to them and some car owners are able to get on foot after parking at a nearby carpark.  Hence, the maximum distance of the car stop position to the location coordinates will be set at less than 500 metres, a reasonable distance for traveling on foot. 
+3. Employees might not drive their issued car out when they perform the transaction using their cc. Examples could be car pooling for a meal or using their personal vehicles when making the transactions. This will result in a incomplete tagging of the car id GPS to the transaction data.
+
+The interactive heatmap in Figure \@ref(fig:tagging) shows the percentage that were successfully match with the car GPS and cc transaction data by the conditions mentioned earlier. The histogram was also plotted to visualise the distribution of the result. From the two visualisation, we observed that the methodology yield some high percentage match for the car id owner with the cc owner. 
+
+```{r tagging, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8, fig.align = 'center', fig.cap = 'Car GPS tagging to CC number', fig.width=20,fig.height=10}
+# Tagging location coordinates
+location_tag <- data.frame(location = c(locations$location,"GAStech"),
+ long =c(centroid(rbind(c(24.82590612, 36.05102229),c(24.82591819, 36.05092013),c(24.82598413, 36.05097547)))[1],
+         centroid(rbind(c(24.84592966, 36.07443715),c(24.84598782, 36.07434876),c(24.84595026, 36.07437836)))[1],
+         centroid(rbind(c(24.85097804, 36.06349268),c(24.85099445, 36.06342076),c(24.85103178, 36.06348173)))[1],
+         centroid(rbind(c(24.87617634, 36.07713037),c(24.87621582, 36.07713598),c(24.87619872, 36.07715385)))[1],
+         centroid(rbind(c(24.85626503, 36.07529323),c(24.85631411, 36.07523202),c(24.85634841, 36.07528136)))[1],
+         centroid(rbind(c(24.85089145, 36.08172086),c(24.85096025, 36.08176242),c(24.85087799, 36.08180554)))[1],
+         centroid(rbind(c(24.90119998, 36.05402165),c(24.90128202, 36.05408823),c(24.90116585, 36.05411015)))[1],
+         NA,
+         centroid(rbind(c(24.88089399, 36.05851786),c(24.88092086, 36.05858619),c(24.8808655, 36.05856303)))[1],
+         centroid(rbind(c(24.8951996, 36.07073983),c(24.89517891, 36.07062423),c(24.89526281, 36.07069274)))[1],                         
+         centroid(rbind(c(24.88983886, 36.05469486),c(24.88978433, 36.05463184),c(24.88977321, 36.05467589)))[1],
+         centroid(rbind(c(24.86416839, 36.07332041),c(24.86417651, 36.07336116),c(24.86419582, 36.07332868)))[1],
+         NA,
+         centroid(rbind(c(24.86068835, 36.08962196),c(24.86068191, 36.08954231),c(24.8607611, 36.08960361)))[1],
+         centroid(rbind(c(24.84132949, 36.07213193),c(24.84134818, 36.07212045),c(24.4134819, 36.07212044)))[1],
+         centroid(rbind(c(24.905573, 36.06044638),c(24.90561679, 36.06033304),c(24.90568587, 36.06040053)))[1],
+         centroid(rbind(c(24.85804364, 36.05970763),c(24.8580772, 36.05975308),c(24.8579808, 36.05976284)))[1],
+         centroid(rbind(c(24.85804364, 36.05970763),c(24.8580772, 36.05975308),c(24.8579808, 36.05976284)))[1],
+         centroid(rbind(c(24.90096913, 36.05842562),c(24.90107066, 36.05844726),c(24.90097455, 36.05850897)))[1],
+         centroid(rbind(c(24.88586605, 36.063639),c(24.88595361, 36.06364584),c(24.88586737, 36.06371539)))[1],
+         centroid(rbind(c(24.85756422, 36.07660977),c(24.85763811, 36.07664766),c(24.857573, 36.07669909)))[1],
+         centroid(rbind(c(24.87330651, 36.06751231),c(24.87335583, 36.06750587),c(24.87333867, 36.06755141)))[1],                    
+         centroid(rbind(c(24.85237319, 36.06582037),c(24.85241027, 36.06582475),c(24.85237372, 36.06584816)))[1],
+         centroid(rbind(c(24.89986767, 36.05442391),c(24.89996154, 36.05448329),c(24.89987365, 36.05453273)))[1],
+         centroid(rbind(c(24.84983351, 36.06587998),c(24.84983936, 36.06582196),c(24.8497762, 36.06583535)))[1],
+         NA,
+         centroid(rbind(c(24.88551872, 36.05840982),c(24.88542068, 36.0584603),	c(24.88553455, 36.05844325)))[1],
+         centroid(rbind(c(24.83307421, 36.0653098),c(24.83314028, 36.06523446),	c(24.84143955, 36.06403449),c(24.84141463, 36.06410072)))[1],
+         NA,
+         centroid(rbind(c(24.87077341, 36.05196196),c(24.87081903, 36.05192066),c(24.87083665, 36.05197804)))[1],
+         centroid(rbind(c(24.85227441, 36.06324941),c(24.85226894, 36.06330479),c(24.8523291, 36.0632684)))[1],
+         NA,NA,
+         centroid(rbind(c(24.87148791, 36.06774029),c(24.8714995, 36.06774623),c(24.87149104, 36.06776587)))[1],
+         centroid(rbind(c(24.87956897, 36.04802112),c(24.8795714, 36.04804908),	c(24.8795745, 36.0480309)))[1]),
+ lat = c(centroid(rbind(c(24.82590612, 36.05102229),c(24.82591819, 36.05092013),c(24.82598413, 36.05097547)))[2],
+         centroid(rbind(c(24.84592966, 36.07443715),c(24.84598782, 36.07434876),c(24.84595026, 36.07437836)))[2],
+         centroid(rbind(c(24.85097804, 36.06349268),c(24.85099445, 36.06342076),c(24.85103178, 36.06348173)))[2],
+         centroid(rbind(c(24.87617634, 36.07713037),c(24.87621582, 36.07713598),c(24.87619872, 36.07715385)))[2],
+         centroid(rbind(c(24.85626503, 36.07529323),c(24.85631411, 36.07523202),c(24.85634841, 36.07528136)))[2],
+         centroid(rbind(c(24.85089145, 36.08172086),c(24.85096025, 36.08176242),c(24.85087799, 36.08180554)))[2],
+         centroid(rbind(c(24.90119998, 36.05402165),c(24.90128202, 36.05408823),c(24.90116585, 36.05411015)))[2],
+         NA,
+         centroid(rbind(c(24.88089399, 36.05851786),c(24.88092086, 36.05858619),c(24.8808655, 36.05856303)))[2],
+         centroid(rbind(c(24.8951996, 36.07073983),c(24.89517891, 36.07062423),c(24.89526281, 36.07069274)))[2],
+         centroid(rbind(c(24.88983886, 36.05469486),c(24.88978433, 36.05463184),c(24.88977321, 36.05467589)))[2],
+         centroid(rbind(c(24.86416839, 36.07332041),c(24.86417651, 36.07336116),c(24.86419582, 36.07332868)))[2],
+         NA,
+         centroid(rbind(c(24.86068835, 36.08962196),c(24.86068191, 36.08954231),c(24.8607611, 36.08960361)))[2],
+         centroid(rbind(c(24.84132949, 36.07213193),c(24.84134818, 36.07212045),c(24.4134819, 36.07212044)))[2],
+         centroid(rbind(c(24.905573, 36.06044638),c(24.90561679, 36.06033304),c(24.90568587, 36.06040053)))[2],
+         centroid(rbind(c(24.85804364, 36.05970763),c(24.8580772, 36.05975308),c(24.8579808, 36.05976284)))[2],
+         centroid(rbind(c(24.85804364, 36.05970763),c(24.8580772, 36.05975308),c(24.8579808, 36.05976284)))[2],
+         centroid(rbind(c(24.90096913, 36.05842562),c(24.90107066, 36.05844726),c(24.90097455, 36.05850897)))[2],
+         centroid(rbind(c(24.88586605, 36.063639),c(24.88595361, 36.06364584),c(24.88586737, 36.06371539)))[2],
+         centroid(rbind(c(24.85756422, 36.07660977),c(24.85763811, 36.07664766),c(24.857573, 36.07669909)))[2],
+         centroid(rbind(c(24.87330651, 36.06751231),c(24.87335583, 36.06750587),c(24.87333867, 36.06755141)))[2],
+         centroid(rbind(c(24.85237319, 36.06582037),	c(24.85241027, 36.06582475),c(24.85237372, 36.06584816)))[2],
+         centroid(rbind(c(24.89986767, 36.05442391),c(24.89996154, 36.05448329),	c(24.89987365, 36.05453273)))[2],
+         centroid(rbind(c(24.84983351, 36.06587998),c(24.84983936, 36.06582196),c(24.8497762, 36.06583535)))[2],
+          NA,
+         centroid(rbind(c(24.83307421, 36.0653098),c(24.83314028, 36.06523446),	c(24.84143955, 36.06403449),c(24.84141463, 36.06410072)))[1],
+         centroid(rbind(c(24.88551872, 36.05840982),c(24.88542068, 36.0584603),	c(24.88553455, 36.05844325)))[2],
+          NA,
+         centroid(rbind(c(24.87077341, 36.05196196),c(24.87081903, 36.05192066),c(24.87083665, 36.05197804)))[2],
+         centroid(rbind(c(24.85227441, 36.06324941),c(24.85226894, 36.06330479),c(24.8523291, 36.0632684)))[2],
+         NA,NA,
+         centroid(rbind(c(24.87148791, 36.06774029),c(24.8714995, 36.06774623),c(24.87149104, 36.06776587)))[2],
+         centroid(rbind(c(24.87956897, 36.04802112),c(24.8795714, 36.04804908),	c(24.8795745, 36.0480309)))[2]))
+location_tag <- location_tag %>% na.omit()
+location_tag <- st_as_sf(location_tag, coords=c("long","lat"), crs=4326)
+
+## join GPS data with transaction data with location coordinates
+final_trans_gps <- inner_join(final_trans_1, location_tag, by=c("location")) %>%
+  rename(loc.coord=geometry)
+## Join with car GPS and tag the location to car gps
+gps_match <- final_trans_gps %>% 
+  left_join(gps_pts , by=c("date"))%>% 
+  group_by(last4ccnum) %>% arrange(datetime) %>%
+  filter(datetime > end.time & datetime <= next.start.time + minutes(30)) %>%
+  mutate(diff.dist = st_distance(loc.coord, end.gps, by_element=TRUE),
+         diff.dist = as.numeric(diff.dist)) %>%
+  filter(diff.dist <500)
+tagging <-gps_match %>%group_by(last4ccnum, id)%>%
+  summarize(tag=n()) %>% arrange(desc(tag))
+## Get total count of transactions minus the 4 locations per cc num
+trans_collapse <- cc %>%
+  filter(!(location %in% c("Bean There Done That",
+                           "Brewed Awakenings",
+                           "Coffee Shack",
+                           "Jack's Magical Beans"))) %>%
+  group_by(last4ccnum) %>% summarize(total=n())
+## Limit to top 3 match only by percentage
+tagging_cc_gps <- left_join(tagging, trans_collapse, by=c("last4ccnum")) %>%
+  mutate(percent=round(tag/total*100,2))
+
+tag_plot<-ggplot(tagging_cc_gps, aes(x=id, y=last4ccnum,fill=percent))+
+  geom_tile() + scale_fill_gradient(low="sienna1", high="navyblue") +
+  xlab("Car ID") +ylab("CC last 4 number")+ 
+  labs(fill="% match")
+histogram<-ggplot(tagging_cc_gps,aes(percent))+geom_histogram(binwidth=5)+
+  stat_function(fun=dnorm,aes(color="red"),
+                args=list(mean=mean(tagging_cc_gps$percent),
+                sd=sd(tagging_cc_gps$percent)))
+ggplotly(tag_plot) %>% layout(hoverlabel=list(bgcolor="white"))
+ggplotly(histogram) %>% layout(hoverlabel=list(bgcolor="white"))
+```
+
+Hence, we can confidently infer that matches over 75% will be accurate. However, as there are more cc owners (55 unique owners) than car owners (35 unique car id) and the truck drivers share vehicles (5 unique truck id), we will drop the truck drivers with car id of 100 and above. Observation of the heatmap in figure \@ref(fig:tagging) reveals that car id 23, car id 29 and car id 30 has matches of more than one cc number and car id 28 does not have a match with more than 75%. 
+
+From Table 6, we observe that car id 23 matches to three unique cc number with matches over 75%. The highest percentage match to cc 3484 at 91.43% shows high probability for inference, hence the observation that matches to cc 8202 and 8411 will be dropped.
+
+For car id 29 and 30, the matches to cc number percentage are relatively high and defers less than 10%. Further investigation on the GPS map location will be performed to verify which match to retain. 
+
+```{r, echo=TRUE, eval=TRUE}
+## Get the match of car id to cc last4ccnum
+tagging <- tagging_cc_gps %>% mutate(id=as.character(id), id=as.numeric(id)) %>% 
+  filter(percent>=75 & id<100)
+knitr::kable(tagging %>% filter(id==23 | id==29 | id==30) %>% 
+               arrange(id), "simple",
+      caption="Table of employees record and their cc and loyalty number")
+final_tagging <- tagging %>% 
+  filter(!(last4ccnum==8202 & id==23), !(last4ccnum==8411 & id ==23))
+```
+
+Investigation of car id 28 low cc transactions matches was visualised in Figure \@ref(fig:map5) and it revealed that the GPS coordinates of car id 28 has lots of noise. The noise in the GPS line caused a wider spread of GPS line in the visualisation on the map and also zig-zag incoherent GPS path. This most probably signifies a faulty GPS signal on the car. 
+
+Secondly, we observe that the stop position was not accurate. For example, the frequency of GPS stop coordinates at the extreme south of the map should be at GAStech. Hence, the GPS stop coordinates seems to deviate in the North-West direction. The most probable explanation will be a faulty GPS system since the GPS points were noisy and were not correctly geo-referenced on the map.
+
