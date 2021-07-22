@@ -118,7 +118,7 @@ knitr::kable(head(loyalty[,1:4]), "simple")
 The following packages are loaded for data preparation and visualisation.
 
 ```{r, echo=TRUE}
-packages = c('tidyverse', 'lubridate', 'hms', 'MASS',
+packages = c('tidyverse', 'lubridate', 'MASS',
              'ggplot2', 'cdparcoord', 'ggiraph', 'plotly', 
              'geosphere', 'sf','rgeos', 'crosstalk',
              'raster', 'tmap','visNetwork','ggraph','tidygraph',
@@ -243,7 +243,7 @@ non_match_trans %>%
 
 There was a subset of cc transactions that are not tagged to any loyalty card transactions. Possible deductions could be that owners forgot their loyalty card when making the transactions or there might be suspicious activities in these transactions where owners deliberately avoided using their loyalty card. This subset of transactions was visualise with a boxplot in Figure \@ref(fig:boxplot1). The boxplot displayed one extreme outlier at *Frydos Autosupply n' More*. Hovering over the red outlier circle indicates that the owner of cc 9551 spent 10,000 dollars in that transaction whereas the median price is 134.9 at *Frydos Autosupply n' More*. This transaction was extremely suspicious because of the extreme outlier spending and the owner did not use his/her loyalty card despite being such a high amount transactional value.
 
-```{r boxplot1, eval=TRUE, echo=TRUE, layout="l-page", fig.align = 'center', fig.cap = 'Boxplot of cc transaction without loyalty card',fig.width=15,fig.height=10}
+```{r boxplot1, eval=TRUE, echo=TRUE, layout="l-page", fig.align = 'center', fig.cap = 'Boxplot of cc transaction without loyalty card',fig.width=15,fig.height=8}
 ## Transactions match equally from cc and loyalty card
 match_cc <- left_join((left_join(cc, card_tag)), 
                       loyalty, by=c("location","date","price")) %>% 
@@ -356,7 +356,7 @@ There were frequent transactions performed at *Kronos Mart* during the midnight 
 
 In the boxplot, there was an extreme outlier of 1,239.41 dollars while the median was only 211.47 dollars. It was six times the median price which might be a suspicious transactions. However, looking at the frequency of transactions at *Albert's Fine Clothing*, it seems like a common place to buy clothing. Possible deduction was the person was buying lots of clothing for his family or friends, amounting to a much higher price than usual. 
 
-```{r boxplot2, eval=TRUE, echo=TRUE, layout="l-page", fig.align = 'center', fig.cap = 'Visualize transactions history',fig.width=20,fig.height=10}
+```{r boxplot2, eval=TRUE, echo=TRUE, layout="l-page", fig.align = 'center', fig.cap = 'Visualize transactions history',fig.width=20,fig.height=8}
 ## Data manipulation to add more factors
 final_trans_1 <- final_trans %>% ungroup() %>%
   mutate(day = as.factor(wday(date)),
@@ -443,7 +443,7 @@ Figure \@ref(fig:map1) shows all cars GPS travel lines for 13/01/2014. From Figu
 
 Car id 24 GPS line was marked in red and the stationary GPS coordinates were marked as blue dots. These blue dots will represent the GPS coordinates where the car was stationary at the particular location.
 
-Hovering over the blue dot near *U-Pump* on the map shows the car stopping at 12:35:15 and leaving at 13:22:01. This matches the transaction performed at *U-Pump* at 13:18:00. With a strong possibility that car id 24 uses cc 9951, the heatmap was used to visualise the time period for the day when the car is on the move. The horizontal blue bars in Figure \@ref(fig:map1) represents the time period when the car is moving.
+Hovering over the blue dot near *U-Pump* on the map shows the car stopping at 12:35:15 and leaving at 13:22:01. This matches the transaction performed at *U-Pump* at 13:18:00.
 
 Thereafter, the car left *U-Pump* at 13:22:01 and arrived back in GAStech at 13:27:14. Hence, the transaction at 13:28:00 at *Hippokampos* was not possible.
 
@@ -456,69 +456,42 @@ The combination of transaction data of cc 9551 records with car id 24 does not f
 ```{r map1, eval=TRUE, echo=TRUE, layout="l-page",fig.height=8, fig.align = 'center', fig.cap = 'GPS data for 13/01/2014'}
 ## Load Map and SHP file
 bgmap <- raster("datasets/MC2-tourist.tif")
-abila_st <- st_read(dsn="datasets/Geospatial", layer="Abila")
 
-## Transform the structure of GPS data
+## Transform the structure of GPS data for Map
 gps <- gps %>% mutate(timestamp=mdy_hms(Timestamp),id=as_factor(id))
-gps1 <- st_as_sf(gps, coords=c("long","lat"), crs=4326)
-gps1 <- gps1 %>% group_by(id) %>% arrange(timestamp) %>%
+gps_sf <- st_as_sf(gps, coords=c("long","lat"), crs=4326)
+gps_stop <- gps_sf %>% group_by(id) %>% arrange(timestamp) %>%
   mutate(start_diff= as.numeric(timestamp - lag(timestamp,default=first(timestamp)))/60,
          stop_diff= as.numeric(lead(timestamp)-timestamp)/60,
-         date = as.Date(timestamp)) %>%
-  rename(gps.coord=geometry) 
-
-## Convert coordinates to geometry, filter date and convert to LINE string
-gps_sf <- st_as_sf(gps, coords=c("long","lat"), crs=4326) 
-gps_sf1 <- gps_sf %>% filter(as.Date(gps_sf$timestamp) == dmy(13012014))
-gps_path1 <- gps_sf1 %>% group_by(id) %>% 
-  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
-gps_sf_24 <- gps_sf1 %>% filter(as.Date(gps_sf1$timestamp) == dmy(13012014), id==24)
-gps_path_24 <- gps_sf_24 %>% group_by(id) %>% 
-  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
-gps_24_points <- gps1 %>% filter(id ==24 & date == dmy(13012014)) %>% 
+         date = as.Date(timestamp)) %>% 
   filter(start_diff>5 | stop_diff >5) %>% 
   mutate(start_vec=ifelse(start_diff>5,1,0), stop_vec=ifelse(stop_diff>5,1,0))
 
-gps_pts <- gps1 %>% filter(start_diff >5 | stop_diff >5)
-gps_pts <- gps_pts %>% group_by(id) %>% 
-  mutate(start_vec=ifelse(start_diff>5,1,0), 
-         stop_vec=ifelse(stop_diff>5,1,0)) %>%
-  filter(!(start_vec==1 & stop_vec==1)) %>% 
-  mutate( start.time = ifelse(start_vec==1, timestamp,NA),
-          end.time=ifelse(stop_vec==1, timestamp, NA),
-          start.gps = ifelse(start_vec==1, gps.coord,NA), 
-          end.gps=ifelse(stop_vec==1, gps.coord,NA),
-          end.time = ifelse(start_vec==1, lead(end.time), end.time),
-          end.gps = ifelse(start_vec==1, lead(end.gps), end.gps)) %>% 
-  filter(!is.na(start.time))%>% 
-  mutate(start.time= as_datetime(start.time), 
-         end.time=as_datetime(end.time)) %>% 
-  dplyr::select(id, date, start.time, end.time, start.gps, end.gps) %>%
-  mutate(hr=hours(start.time),
-         time.diff=round(difftime(end.time,start.time,units='mins'),2),
-         dummy=1) 
-gps24 <- gps_pts %>% filter(id==24&date==dmy(13012014))
-hm24<-ggplot(gps24, aes(x=start.time, y=id, 
-    tooltip=paste("Car start time:",start.time,
-                  "\nCar stop time:",end.time,
-                  "\nDriving time (mins):",time.diff))) +
-  geom_tile_interactive(aes(fill=dummy)) +
-  xlab("Time") + ylab("Car id")+theme(legend.position="none")
-
-
+## Convert to LINE string for 13/01/2014
+gps_path_all <- gps_sf %>% 
+  filter(as.Date(gps_sf$timestamp) == dmy(13012014)) %>% 
+  group_by(id) %>% 
+  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
+## Convert to LINE string for 13/01/2014 and car id 24
+gps_path_24 <- gps_sf %>% 
+  filter(as.Date(gps_sf$timestamp) == dmy(13012014), id==24) %>% 
+  group_by(id) %>% 
+  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
+## Filter stop points for 13/01/2014 and car id 24
+gps_24_points <- gps_stop %>% filter(id ==24 & date == dmy(13012014))
+ 
 ## Plot interactive map
 tmap_mode("view")
 map1<-tm_shape(bgmap) +
   tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
          interpolate=TRUE, max.value=255) +
-  tm_shape(gps_path1)+
+  tm_shape(gps_path_all)+
   tm_lines() +
   tm_shape(gps_path_24) +
   tm_lines(col ="red") +
   tm_shape(gps_24_points)+
   tm_dots(col="blue", shape=30)
 tmap_leaflet(map1)
-girafe(ggobj=hm24)
 ```
 
 **2.2** The second anomaly were the early morning transactions records at *Kronos Mart* from Figure \@ref(fig:boxplot2) frequency plot. Table 3 below displays all transactions records at *Kronos Mart*. Five out of the ten transactions were performed in the wee hours around 3am on three different days and three out of the five occurred on 19/01/2014. These few transactions were particularly unusual and further investigation was conducted.  
@@ -530,7 +503,6 @@ knitr::kable(final_trans_1 %>%
       dplyr::select(datetime,location,price,last4ccnum,trans_match)%>% 
       arrange(datetime), "simple",
       caption="Table of transaction for cc 9951 on 13/01/2014") 
-
 ```
 
 The GPS records for 19/01/2014 were visualised to investigate the transactions. From Figure \@ref(fig:map2), there was no GPS data that passed by nor stop in the vicinity of *Kronos Mart* on 19/01/2014. The closest stop location was at *ROBERTS AND SONS* at 13:20:06 to 14:23:01 by car id 30 represented by the blue dot. The timing of the transaction does not coincide with the cc transaction timing. 
@@ -539,13 +511,11 @@ Hence, possible deduction could be that cc owners of 3484, 9551 and 8332 stays w
 
 ```{r map2, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8,fig.align = 'center', fig.cap = 'GPS data for 19/01/2014'}
 ## Map geometry for 19012014
-gps_sf2 <- gps_sf %>% filter(as.Date(gps_sf$timestamp) == dmy(19012014))
-gps_path2 <- gps_sf2 %>% group_by(id) %>% 
+gps_path2 <- gps_sf %>% 
+  filter(as.Date(gps_sf$timestamp) == dmy(19012014) & id !=29) %>% 
+  group_by(id) %>% 
   summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
-gps_path2 <- gps_path2 %>% filter(id !=29)
-gps_points2 <- gps1 %>% filter(date == dmy(19012014)) %>% 
-  filter(start_diff>5 | stop_diff >5) %>% 
-  mutate(start_vec=ifelse(start_diff>5,1,0), stop_vec=ifelse(stop_diff>5,1,0))
+gps_points2 <- gps_stop %>% filter(date == dmy(19012014))
 
 ## Plot interactive map
 tmap_mode("view")
@@ -592,12 +562,11 @@ Based on the 7 locations name and logo, they are likely to be industrial Places 
 
 ```{r map3, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8,fig.align = 'center', fig.cap = 'GPS data for 07/01/2014'}
 ## Map geometry for 07012014
-gps_sf3 <- gps_sf %>% filter(as.Date(gps_sf$timestamp) == dmy(07012014))
-gps_path3 <- gps_sf3 %>% group_by(id) %>% 
+gps_path3 <- gps_sf %>% 
+  filter(as.Date(gps_sf$timestamp) == dmy(07012014)) %>% 
+  group_by(id) %>% 
   summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
-gps_points3 <- gps1 %>% filter(date == dmy(07012014)) %>% 
-  filter(start_diff>5 | stop_diff >5) %>% 
-  mutate(start_vec=ifelse(start_diff>5,1,0), stop_vec=ifelse(stop_diff>5,1,0))
+gps_points3 <- gps_stop %>% filter(date == dmy(07012014)) 
 
 ## Plot interactive map
 tmap_mode("view")
@@ -646,21 +615,20 @@ Cross referencing with the transactions table, the locations coordinates were ta
 
 ```{r map4, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8, fig.align = 'center', fig.cap = 'GPS stationary locations'}
 ## Getting coordinates of car stop positions
-first_gps <- gps1 %>% group_by(id) %>% filter(row_number()==1) %>%
-  mutate(start_vec=1, stop_vec=0)  %>% ungroup(id)
-gps_pts <- gps1 %>% ungroup(id) %>%
-  filter(start_diff >5 | stop_diff >5) %>%
-  mutate(start_vec=ifelse(start_diff>5,1,0),
-         stop_vec=ifelse(stop_diff>5,1,0)) %>%
+first_gps <- gps_stop %>% 
+  group_by(id) %>% 
+  filter(row_number()==1) %>% 
+  ungroup(id)
+gps_pts <- gps_stop %>% ungroup(id) %>%
   add_row(first_gps) %>% group_by(id) %>% arrange(timestamp) %>%
   filter(!(start_vec==1 & stop_vec==1)) %>%
   group_by(id) %>% arrange(timestamp) %>%
   mutate( start.time = ifelse(start_vec== 0 & stop_vec==0, timestamp, NA),
           start.time = ifelse(start_vec==1, timestamp,NA),
           end.time=ifelse(stop_vec==1, timestamp, NA),
-          start.gps = ifelse(start_vec==0 & stop_vec==0, gps.coord,NA),
-          start.gps = ifelse(start_vec==1, gps.coord,NA),
-          end.gps=ifelse(stop_vec==1, gps.coord,NA),
+          start.gps = ifelse(start_vec==0 & stop_vec==0, geometry,NA),
+          start.gps = ifelse(start_vec==1, geometry,NA),
+          end.gps=ifelse(stop_vec==1, geometry,NA),
           end.time = ifelse(start_vec==1, lead(end.time), end.time),
           end.gps = ifelse(start_vec==1, lead(end.gps), end.gps)) %>%
   filter(!is.na(start.time))%>%
@@ -668,18 +636,16 @@ gps_pts <- gps1 %>% ungroup(id) %>%
          end.time = ifelse(is.na(end.time),start.time, end.time),
          start.time= as_datetime(start.time),
          end.time=as_datetime(end.time),
-         next.start.time=lead(start.time)) %>%
-  dplyr::select(id, date, start.time,
-                end.time, start.gps, end.gps, next.start.time) %>%
-  mutate(hr=hours(start.time),
-         driving.time=round(difftime(end.time,start.time,units='mins'),2),
-         dummy=1) %>%
+         next.start.time=lead(start.time),
+         driving.time=round(difftime(end.time,start.time,units='mins'),2)) %>%
+  dplyr::select(id, date, start.time, end.time, start.gps, end.gps, 
+                next.start.time, driving.time) %>%
   mutate(start.gps=purrr::map(start.gps, st_point) %>% st_as_sfc(crs=4326))%>%
-  mutate(end.gps=purrr::map(end.gps, st_point) %>% st_as_sfc(crs=4326))
+  mutate(end.gps=purrr::map(end.gps, st_point) %>% st_as_sfc(crs=4326)) 
 car$CarID <- as_factor(car$CarID)
 gps_pts <- left_join(gps_pts, car, by=c("id"="CarID"))
 gps_stop_points1 <- gps_pts %>%
-  mutate(time.stop = difftime(next.start.time, end.time), 
+  mutate(time.stop = difftime(next.start.time, end.time, units=c("mins")), 
          time.stop = as.numeric(time.stop))%>% 
   filter(time.stop < 300) %>% 
   dplyr::select(id, start.time, start.gps)
@@ -782,15 +748,15 @@ location_tag <- st_as_sf(location_tag, coords=c("long","lat"), crs=4326)
 ## join GPS data with transaction data with location coordinates
 final_trans_gps <- inner_join(final_trans_1, location_tag, by=c("location")) %>%
   rename(loc.coord=geometry)
-## Join with car gps
-gps_match <- left_join(final_trans_gps, gps_pts, by=c("date"))
-## Tag the location to car gps
-gps_match1 <- gps_match %>% group_by(last4ccnum) %>% arrange(datetime) %>%
+## Join with car GPS and tag the location to car gps
+gps_match <- final_trans_gps %>% 
+  left_join(gps_pts , by=c("date"))%>% 
+  group_by(last4ccnum) %>% arrange(datetime) %>%
   filter(datetime > end.time & datetime <= next.start.time + minutes(30)) %>%
   mutate(diff.dist = st_distance(loc.coord, end.gps, by_element=TRUE),
          diff.dist = as.numeric(diff.dist)) %>%
   filter(diff.dist <500)
-tagging <-gps_match1 %>%group_by(last4ccnum, id)%>%
+tagging <-gps_match %>%group_by(last4ccnum, id)%>%
   summarize(tag=n()) %>% arrange(desc(tag))
 ## Get total count of transactions minus the 4 locations per cc num
 trans_collapse <- cc %>%
@@ -838,12 +804,11 @@ Secondly, we observe that the stop position was not accurate. For example, the f
 
 ```{r map5, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8,fig.align = 'center', fig.cap = 'Original GPS for car id 28'}
 ## Map geometry for original car id 28 data
-gps_sf5 <- gps_sf %>% filter(id==28)
-gps_path5 <- gps_sf5 %>% group_by(id) %>% 
+gps_path5 <- gps_sf %>%
+  filter(id==28) %>% 
+  group_by(id) %>% 
   summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
-gps_28_points <- gps1 %>% filter(id ==28) %>% 
-  filter(start_diff>5 | stop_diff >5) %>% 
-  mutate(start_vec=ifelse(start_diff>5,1,0), stop_vec=ifelse(stop_diff>5,1,0))
+gps_28_points <- gps_stop %>% filter(id ==28)
 
 ## Plot interactive map
 tmap_mode("view")
@@ -871,8 +836,7 @@ gps28 <- gps %>% filter(id==28) %>%
 gps_sf28 <- st_as_sf(gps28, coords=c("long","lat"), crs=4326)
 gps_path28 <- gps_sf28 %>% group_by(id) %>% 
   summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
-gps28_pt <- st_as_sf(gps28, coords=c("long","lat"), crs=4326)
-gps28_pt <- gps28_pt %>% 
+gps28_pt <- gps_sf28 %>% 
   group_by(id) %>% arrange(timestamp) %>%
   mutate(start_diff= as.numeric(timestamp - lag(timestamp,default=first(timestamp)))/60,
          stop_diff= as.numeric(lead(timestamp)-timestamp)/60,
@@ -903,8 +867,9 @@ Next, we will focus on car id 29 where it matches 90% of cc 3547 transactions an
 Looking at table 7 for both cc number, we observe that cc 3547 has transactions between 12/01/2014 to 19/01/2014 and cc 5921 has transactions between 06/01/2014 to 10/01/2014. Cross-referencing the GPS data for car id 29 in Figure \@ref(fig:map7), we can observe that the cc transactions matches the GPS data of car id 29. A possible deduction is that the owner of car id 29 used both cc card as there was no overlap in the transaction dates for both cc. Possible scenario could be that the owner switch the CC from 5921 to 3547 after 10/01/2014. However, there might be missing data on 11/01/2014 where it was not captured on both cc. Hence, we will tag car id 29 to both cc 5921 and 3547.
 
 ```{r map7, eval=TRUE, echo=TRUE, layout="l-body-outset", fig.height=8,fig.align = 'center', fig.cap = 'GPS for car id 29'}
-gps_sf29 <- gps_sf %>% filter(id==29)
-gps_path29 <- gps_sf29 %>% group_by(id) %>% 
+gps_path29 <- gps_sf %>% 
+  filter(id==29) %>% 
+  group_by(id) %>% 
   summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
 gps29_pt <- gps_stop_points1 %>% filter(id==29)
 tmap_mode("view")
@@ -930,11 +895,12 @@ Comparing the GPS data map and cc translation data, we focused on locations with
 3. GPS data showed visits to *Hippokampos* on 10/01/2014 and 14/01/2014 and only cc 6901 has matching transaction for both days.
 
 ```{r map8, eval=TRUE, echo=TRUE, layout="l-page", fig.align = 'center', fig.cap = 'GPS for car id 30',fig.height=8}
-gps_sf_30 <- gps_sf %>% filter(id==30)
-gps_path_30 <- gps_sf_30 %>% group_by(id) %>%
+gps_path_30 <- gps_sf %>% 
+  filter(id==30) %>% 
+  group_by(id) %>%
   summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
 gps_stop_points30 <- gps_pts %>%
-  mutate(time.stop = difftime(next.start.time, end.time), 
+  mutate(time.stop = difftime(next.start.time, end.time, units=c("mins")), 
          time.stop = as.numeric(time.stop))%>% 
   filter(time.stop < 300 & id==30) %>% 
   dplyr::select(id, start.time, start.gps)
@@ -1166,8 +1132,10 @@ gps_stop_points <- gps_pts %>%
          id=as.character(id),id=as.numeric(id),
          gps.coord=end.gps)%>% 
   filter(id<100 ) %>%
-  dplyr::select(name, CurrentEmploymentType,CurrentEmploymentTitle,end.time, end.gps,next.start.time,time.location) %>% 
-  rename(Arrival.Time=end.time, Coordinate=end.gps,Next_move_off_time=next.start.time,Time_at_location=time.location)
+  dplyr::select(name, CurrentEmploymentType,CurrentEmploymentTitle,
+                end.time, end.gps,next.start.time,time.location) %>% 
+  rename(Arrival.Time=end.time, Coordinate=end.gps,
+         Next_move_off_time=next.start.time,Time_at_location=time.location)
 
 ## Plot interactive map
 tmap_mode("view")
@@ -1335,7 +1303,7 @@ From the map in figure \@ref(fig:map24), we discovered only five cars ever visit
 ```{r,fig.align = 'center', layout='l-page'}
 capitol<-st_set_crs(st_sfc(st_point(c(24.84936527, 36.05293538))),4326)
 gps_capitol <- gps_stop_points %>% 
-  mutate(diff=st_distance(gps.coord,capitol),
+  mutate(diff=st_distance(geometry,capitol),
          diff=as.numeric(diff)) %>% 
   filter(diff<50) %>% 
   st_drop_geometry() %>% 
