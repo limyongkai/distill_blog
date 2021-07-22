@@ -802,3 +802,28 @@ Investigation of car id 28 low cc transactions matches was visualised in Figure 
 
 Secondly, we observe that the stop position was not accurate. For example, the frequency of GPS stop coordinates at the extreme south of the map should be at GAStech. Hence, the GPS stop coordinates seems to deviate in the North-West direction. The most probable explanation will be a faulty GPS system since the GPS points were noisy and were not correctly geo-referenced on the map.
 
+```{r map5, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8,fig.align = 'center', fig.cap = 'Original GPS for car id 28'}
+## Map geometry for original car id 28 data
+gps_path5 <- gps_sf %>%
+  filter(id==28) %>% 
+  group_by(id) %>% 
+  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
+gps_28_points <- gps_stop %>% filter(id ==28)
+
+## Plot interactive map
+tmap_mode("view")
+map5<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_path5)+
+  tm_lines() +
+  tm_shape(gps_28_points)+
+  tm_dots(col="blue")
+tmap_leaflet(map5)
+```
+
+After re-calibrating the GPS coordinates for car id 28, Figure \@ref(fig:map6) shows the GPS movement data for car id 28. With the re-calibrated GPS data, we would match it with the cc transaction data to infer which cc belongs to car id 28. 
+
+From the map in Figure \@ref(fig:map6), the unqiue observation was that car id 28 visited *Ahaggo Museum* on the 18th and 19th of Jan and frequently patronise *Jack's Magical Beans* and *Ouzeri Elian* over the two weeks. 
+
+From the cc transaction table, a search of *Ahaggo Museum* revealed that cc 1286, 7384 and 9241 made transactions on the 18th and 19th of Jan. Next, a search of *Jack's Magical Beans* shows that only cc 9241 out of the three cc made transactions at the location. Lastly, a search of *Ouzeri Elian* on the datatable reveals that cc 9241 made 6 transactions at the location. Hence, we are confident to infer that car id 28 is the owner of cc 9241.
