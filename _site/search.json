@@ -12,7 +12,7 @@
       "title": "Lim Yong Kai Blog",
       "author": [],
       "contents": "\r\n\r\nd-title, d-byline {\r\n  display: none\r\n}\r\n\r\n\r\nLim Yong Kai\r\nMaster of IT in Business Student at Singapore Management University\r\n  \r\n\r\nHello there!\r\nI am a student pursuing my Master of IT in Business at Singapore Management University. Graduating with a bachelor in Mechanical Engineering, I am embarking on a new journey into the Data Science industry. As an aspiring Data Scientist, I want to utilize my analytical acumen to find solutions and translate them into actionable insights using data.\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-07-10T15:09:06+08:00"
+      "last_modified": "2021-07-15T22:16:50+08:00"
     },
     {
       "path": "post.html",
@@ -20,7 +20,7 @@
       "description": "My Portfolio~. \n",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-07-10T14:42:18+08:00"
+      "last_modified": "2021-07-10T15:48:10+08:00"
     }
   ],
   "collections": ["posts/posts.json"]

@@ -15,11 +15,12 @@ output:
 font-family: sans serif
 mainfont: \usepackage[T1]{fontenc}
 preview: vast.jpg
+bibliography: references.bib
 ---
 
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, error=FALSE)
 ```
 
 # 1. Overview
@@ -84,7 +85,34 @@ knitr::kable(head(gps[,1:4]), "simple")
 knitr::kable(head(loyalty[,1:4]), "simple")
 ```
 
-# 4. Tasks and Questions:
+# 4. Literature Review
+4.1 Past MITB Visual Analytics project were reviewed and evaluated prior to the assignment. 
+
+* In the assignment by [@ong2016] and [@guan2016], they utilised heatmap to plot frequency by timeseries. The heatmap used a color gradient to fill the boxes which showed the intensity and volume of the frequency and count over a time period. The visual overview allowed readers to easily determine patterns and trends over throughout a timeseries period. For example from [@ong2016] report, it revealed that there were more messages received over the weekend, especially on Sundays. From [@guan2016] report, it revealed that camping3 and camping6 has higher number of records than the other camps.
+  + However, static heatmap are not reader friendly enough to determine what was the count at specific time slots. As each heatmap box represents a discrete count by using a gradient color fill, it was difficult to accurately determine the specific count. Making the heatmap plot interactive would allow the details to be displayed at the tooltip when  hover across. This would allow the granularity data to be more well-presented in the report.
+
+4.2 The solutions submitted for VAST challenge 2014 were also reviewed on their repository webpage[@vastrepo]. 
+
+* Submission entry from the University of Buenos Aires - Tralice [@Buenos_Aires_Tralice] included a multi-layered horizontal bar graph that showed the GPS movement for each employment type. The background highlight to indicate the weekend provided a good contrast and representation for the differentiation between weekday and weekends. 
+
+* Submission entry from KU Leuven [@KU_Leuven] used a boxplot to visualise the credit card spending price at each location. Boxplot allows for distinct and clear visualisation of outliers in the transaction price. However, boxplot also provides informative details such as the median, 25 and 75 percentile price for each location which was not reflected in the boxplot. Furthermore, the 10,000 dollars outliers caused the y-axis tick marks to be large and each individual boxplot became too small on the plot.
+  +  Currently, as the spending price per transaction at each location are much lower in comparison to the tick marks, the features of the boxplot are not represented on the plot. Hence, the boxplot visualisation can be improved by performing logarithmic transformation for the y-axis to better represent the boxplot for prices at each location. It will also allow readers to see the outliers for each location too. 
+  + Interactive boxplot can be implemented to provide the micro-data such as median, 25 and 75 percentile prices using the tooltip when users hover over the points. This reduces cluttering of the plot while providing micro-data to the readers.
+  
+* Submission entry from the University of Calgary [@Uni_Calgary] utilised parallel coordinate plot to show the interaction and relationship between different categorical and numerical variables. The visualisation provides story telling insights between the different variables.
+
+* Most past submission includes the map overlayed with the GPS lines and points to show the movement of each car. I would like to highlight the submission from Central South University [@CSU] where the map utilise different colors for lines and dots to present their findings. The variation in colors allowed for better visualisation and clarity of the different parts to be highlighted to gain insights. However, due to the overlap of GPS data, an interactive map with tooltip will allow better interpretation of the findings.
+
+* Submission from Fraunhofer IAIS and City University London [@Fraunhofer] and RBEI-Bangalore [@RBEI] both used network cluster and analysis to investigate the relationships between GAStech employees. Fraunhofer IAIS university used an ego-centric graph together whereas RBEI used a combination of fragmented and node-only layout to visual the relationship by connecting each employees. The network analysis is an informative visualisation to provide an overview of potential relationships between employees or even connecting employees to different mediums such as the locations or emails.
+  + Although network analysis provides an overview of the relationships between nodes, usually the plot will be cluttered which make it difficult to drill down to specific or individual relationships. An alternative would be to make the plot interactive so that readers will be able to drill down on specific areas to investigate the relationships. 
+
+* Submission from University of Buenos Aires - Alcoser [@Buenos_Aires_Alcoser] used the sankey diagrams to visualise the locations where employees frequently visits. Sankey diagram shows how the quantities flow from one state to another and is usually used to show flows or processes. 
+  + Alluvial Plot is an alternative to Sankey Diagrams where it shows population of facts allocated across categorical dimensions. Depending on the visualisation and context, we can use either Sankey or Alluvial plot for visualisation.
+  
+* Submission from University of Bueons Aires - Croceri [@Buenos_Aires_Croceri] used a scatter plot to show the distance average speed against the speed for each employees route. The visualisation displayed extreme outliers effectively based on the car speed. 
+  + Interactive scatter plot split into different categories and different conditions might present more useful insights to infer possible deductions. Example by drilling down on certain departments or a specific time period etc.  
+
+# 5. Tasks and Questions:
 **1. Using just the credit and loyalty card data, identify the most popular locations, and when they are popular. What anomalies do you see? What corrections would you recommend to correct these anomalies?**
 
 The following packages are loaded for data preparation and visualisation.
@@ -93,7 +121,8 @@ The following packages are loaded for data preparation and visualisation.
 packages = c('tidyverse', 'lubridate', 'hms', 'MASS',
              'ggplot2', 'cdparcoord', 'ggiraph', 'plotly', 
              'geosphere', 'sf','rgeos', 'crosstalk',
-             'raster', 'tmap')
+             'raster', 'tmap','visNetwork','ggraph','tidygraph',
+             'ggalluvial')
 
 for(p in packages){
   if(!require(p, character.only=T)){
@@ -132,20 +161,22 @@ glimpse(cc)
 glimpse(loyalty)
 ```
 
-Prior to joining both data, a quick glance of the aggregated summary statistics shows that there are more credit card transaction as compared to loyalty card transaction for each day. This could implies that employees did not use their loyalty card when they perform a transaction with their credit card and a perfect join of the two dataset is not possible. A left join of cc and loyalty dataset by *location*, *date* and *price* is performed.
+Prior to joining both data, a quick glance of the aggregated summary statistics in table 1 showed that there are more credit card transaction as compared to loyalty card transaction for each day. This could imply that employees did not use their loyalty card when they perform a transaction with their credit card and a perfect join of the two dataset was not possible. A left join of cc and loyalty dataset by *location*, *date* and *price* was performed.
 
-```{r, layout="l-body-outset", echo=TRUE}
+```{r, echo=TRUE}
 ## Summary statistics for cc and loyalty transaction per day
-merge((cc %>% group_by(date) %>% summarize(cc_count = n())), 
+cc_t<-merge((cc %>% group_by(date) %>% summarize(cc_count = n())), 
       (loyalty %>% group_by(date) %>% summarize(loyalty_count = n())), 
       by="date") %>% mutate(diff = cc_count-loyalty_count)
+knitr::kable(cc_t, "simple",
+             caption="Summary statistics for cc and loyalty transaction per day")
 ## Left join cc with loyalty data
 trans <- left_join(cc, loyalty, by=c("location", "date", "price")) %>%
   dplyr::select(-c(timestamp.x, timestamp.y, datetime))
 glimpse(trans)
 ```
 
-The *trans* data mostly tagged a unique "last4ccnum" to a unique "loyaltynum". However, the number of rows increase from 1490 to 1496, implying that multiple matches occur. This is most likely because there are 6 transaction in the loyalty data with the same *location*, *date* and *price* field but different *loyaltynum*.
+The *trans* data mostly tagged a unique "last4ccnum" to a unique "loyaltynum". However, the number of rows increase from 1490 to 1496, implying that multiple matches occur. It is most likely because there were 6 transaction in the loyalty data with the same *location*, *date* and *price* value from different *loyaltynum* card.
 
 To investigate the multiple tagging of each unique cc number or unique loyalty card number, the data was transformed and visualise using an interactive parallel coordinate graph in Figure \@ref(fig:pcplot). Clicking on either vertical axis "last4ccnum" or "loyaltynum" highlights only the matching lines. 
 
@@ -163,13 +194,13 @@ bind_rows(
 
 ```
 
-Selecting credit card number ending 8332, 7889, 5921, 5368, 4948 and 4795 reveals that those credit card are tagged to two different unique loyalty card number and one of them has low transaction count which is represented by the dark brown line. Drilling down on the 6 credit card numbers in the *trans* data, the matching row had only 1 transactions. This imply there were two loyalty transactions that recorded the same *date*, *location* and *price*, resulting in a multiple join to fulfill all possibilities. Hence, these 6 rows of transaction are the difference in row count from the original *cc* data and the *trans* data.
+Selecting credit card number ending 8332, 7889, 5921, 5368, 4948 and 4795 revealed that those credit card were tagged to two different unique loyalty card number and one of them has low transaction count which was represented by the dark brown line. Drilling down on the 6 credit card numbers in the *trans* data, the matching row had only 1 transactions. This imply that there were two loyalty card transactions that recorded the same *date*, *location* and *price*, resulting in a one to many join that fulfilled all conditions. Hence, these 6 rows of transaction were the difference in row count from the original *cc* data and the *trans* data.
 
-Credit card number 1286 is tagged to loyalty number L3288 and L3572 with `r (trans %>% group_by(last4ccnum, loyaltynum) %>% summarize(count_d=n())%>% filter(last4ccnum==1286 & loyaltynum=="L3288"))$count_d` and `r (trans %>% group_by(last4ccnum, loyaltynum) %>% summarize(count_d=n())%>% filter(last4ccnum==1286 & loyaltynum=="L3572"))$count_d` transactions respectively. On the other hand, loyalty number L3288 is also tagged to a unique cc number 9241 with `r (trans %>% group_by(last4ccnum, loyaltynum) %>% summarize(count_d=n())%>% filter(last4ccnum==9241 & loyaltynum=="L3288"))$count_d` transactions. A possible deduction would be the owner of cc 9241 loyalty card is L3288 and owner of cc 1286 loyalty card is L3572. However, the owner of cc 1286 often paid and use L3288 loyalty card. This could suggest close relationship between owners of cc 1286 and 9241.
+Credit card number 1286 was tagged to loyalty number L3288 and L3572 with `r (trans %>% group_by(last4ccnum, loyaltynum) %>% summarize(count_d=n())%>% filter(last4ccnum==1286 & loyaltynum=="L3288"))$count_d` and `r (trans %>% group_by(last4ccnum, loyaltynum) %>% summarize(count_d=n())%>% filter(last4ccnum==1286 & loyaltynum=="L3572"))$count_d` transactions respectively. On the other hand, loyalty number L3288 is also tagged to a unique cc number 9241 with `r (trans %>% group_by(last4ccnum, loyaltynum) %>% summarize(count_d=n())%>% filter(last4ccnum==9241 & loyaltynum=="L3288"))$count_d` transactions. A possible deduction would be the owner of cc 9241 loyalty card is L3288 and owner of cc 1286 loyalty card is L3572. However, the owner of cc 1286 often paid and use L3288 loyalty card. This could suggest close relationship between owners of cc 1286 and 9241.
 
-Loyalty number L6267 is tagged to cc number 6899 and 6691 with `r (trans %>% group_by(loyaltynum, last4ccnum) %>% summarize(count_d=n())%>% filter(last4ccnum==6899 & loyaltynum=="L6267"))$count_d` and `r (trans %>% group_by(loyaltynum, last4ccnum) %>% summarize(count_d=n())%>% filter(last4ccnum==6691 & loyaltynum=="L6267"))$count_d` transaction respectively. On the other hand, both cc 6899 and 6691 has only one tag to the loyalty card. Possible deduction could be that the owner of credit card number 6899 and 6691 is the same person using loyalty card L6267. Another deduction would be loyalty number L6267 is shared among the owners of cc 6899 and 6691. If the latter deduction is correct, this could suggest close relationship between owners of cc 6899 and 6691.
+Loyalty number L6267 wass tagged to cc number 6899 and 6691 with `r (trans %>% group_by(loyaltynum, last4ccnum) %>% summarize(count_d=n())%>% filter(last4ccnum==6899 & loyaltynum=="L6267"))$count_d` and `r (trans %>% group_by(loyaltynum, last4ccnum) %>% summarize(count_d=n())%>% filter(last4ccnum==6691 & loyaltynum=="L6267"))$count_d` transaction respectively. On the other hand, both cc 6899 and 6691 had only one unique tag to the loyalty card. Possible deduction could be that the owner of credit card number 6899 and 6691 is the same person using loyalty card L6267. Another deduction would be loyalty number L6267 is shared among the owners of cc 6899 and 6691. If the latter deduction is correct, this could suggest close relationship between owners of cc 6899 and 6691.
 
-With these information, a new dataset *card_tag* is created to tag the owners of their cc and loyalty card numbers together. However, there are `r sum(is.na(trans$loyaltynum))` transactions in dataset *trans* that were not tagged.
+With these information, a new dataset *card_tag* was created to tag the owners of their cc and loyalty card numbers together. However, there were `r sum(is.na(trans$loyaltynum))` transactions in dataset *trans* that were not tagged.
 
 ```{r, echo=TRUE, eval=TRUE}
 ## Tag owners of credit card to loyalty card number
@@ -182,9 +213,11 @@ card_tag <- trans %>%
   dplyr::select(-(count_d))
 ```
 
-The `r sum(is.na(trans$loyaltynum))` cc transactions that were not tagged was analysed by mapping the cc and loyalty card. Thereafter, a left join of non-tagged transactions to the loyalty data by field "date", "location" and loyaltynum" was performed. From Figure \@ref(fig:pcplot2), it is observed that the difference in cc card price and loyalty price converges to *"20"*, *"40"*, *"60"* and *"80"*. A possible deduction based on the price difference in denomination of *"20"* could suggest some form of discount or rebate. A deliberate shortfall by the loyalty card is not possible as those transactions are evenly spread across the days and locations. Furthermore, as the occurrence in the difference in price exist for multiple cc and loyalty card, it is not possible that the shortfall are targeted towards specific owners.
+The `r sum(is.na(trans$loyaltynum))` cc transactions that were not tagged were analysed by mapping the cc and loyalty card. Thereafter, a left join of non-tagged transactions to the loyalty data by field "date", "location" and loyaltynum" was performed. From Figure \@ref(fig:pcplot2), it was observed that most of the difference in cc card price and loyalty price converges to *"20"*, *"40"*, *"60"* and *"80"* dollars. A possible deduction based on the price difference in denomination of *"20"* could suggest some form of discount or rebate mentioned in the background. 
 
-```{r pcplot2, layout="l-body-outset", echo=TRUE, eval=TRUE, fig.align = 'center', fig.cap = 'Parallel Coordinate plot of CC with to Loyalty card number with discount' }
+A deliberate shortfall is not possible as those transactions were evenly spread across different days and locations. Furthermore, as the occurrence of the difference in price exist for multiple cc and loyalty card, it was not possible that the shortfall were targeted towards specific owners or at specific locations.
+
+```{r pcplot2, layout="l-page", echo=TRUE, eval=TRUE, fig.align = 'center', fig.cap = 'Parallel Coordinate plot of CC to Loyalty card number with discount', fig.height=6}
 ## Non matching cc and loyalty card transaction
 non_match_cc <- anti_join(cc, (trans %>% na.omit())) %>% left_join(card_tag)
 ## Non matching loyalty card and cc transaction
@@ -208,9 +241,9 @@ non_match_trans %>%
                name="Non-matching transactions by cc and loyalty number")
 ```
 
-There is a subset of cc transactions that are not tagged to any loyalty card transactions. Possible deductions could be that owners forgot their loyalty card when making the transactions or there might be suspicious activities in these transactions where owners deliberately avoid using their loyalty card. This subset of transactions is visualise with a boxplot in Figure \@ref(fig:boxplot1). The boxplot displayed one extreme outlier at *Frydos Autosupply n' More*. Hovering over the red outlier circle indicates that the owner of cc 9551 spent 10,000 dollars in that transaction whereas the median price is 134.9 at *Frydos Autosupply n' More*. This transaction is extreme suspicious because of the extreme outlier spending and the owner did not use his/her loyalty card depsite being such a high amount transaction.
+There was a subset of cc transactions that are not tagged to any loyalty card transactions. Possible deductions could be that owners forgot their loyalty card when making the transactions or there might be suspicious activities in these transactions where owners deliberately avoided using their loyalty card. This subset of transactions was visualise with a boxplot in Figure \@ref(fig:boxplot1). The boxplot displayed one extreme outlier at *Frydos Autosupply n' More*. Hovering over the red outlier circle indicates that the owner of cc 9551 spent 10,000 dollars in that transaction whereas the median price is 134.9 at *Frydos Autosupply n' More*. This transaction was extremely suspicious because of the extreme outlier spending and the owner did not use his/her loyalty card despite being such a high amount transactional value.
 
-```{r boxplot1, eval=TRUE, echo=TRUE, layout="l-body-outset", fig.align = 'center', fig.cap = 'Boxplot of cc transaction without loyalty card',fig.width=15,fig.height=10}
+```{r boxplot1, eval=TRUE, echo=TRUE, layout="l-page", fig.align = 'center', fig.cap = 'Boxplot of cc transaction without loyalty card',fig.width=15,fig.height=10}
 ## Transactions match equally from cc and loyalty card
 match_cc <- left_join((left_join(cc, card_tag)), 
                       loyalty, by=c("location","date","price")) %>% 
@@ -254,7 +287,7 @@ boxplot1 <- ggplot(no_loy_trans_1, aes(x=location, y=price, text=paste("Median:"
   geom_point(alpha=0) + scale_y_log10() + coord_flip() +
   ggtitle("Boxplot of CC transaction NOT tagged to loyalty card") +
   theme(axis.title=element_blank(),
-        plot.title=element_text(size=20, face="bold")) +
+        plot.title=element_text(size=16, face="bold")) +
   xlab("Price")
 boxplot_p1<-ggplotly(boxplot1, width_svg = 7, height_svg = 7)
 boxplot_p1$x$data[[1]]$hoverinfo <- "none"
@@ -267,7 +300,7 @@ boxplot_p1$x$data[[1]]$marker$color = "red"
 boxplot_p1
 ```
 
-To determine the most popular location in Abila, the visualisation in Figure \@ref(fig:boxplot2) shows the frequency of the transactions and the transaction prices for each location. The plot *Number of transactions per day by location* shows which location had the highest number of transaction each day separated by time period and the weekends area are shaded in grey. The plot *Boxplot of transaction prices per location* shows the prices for each location. Log transformation was performed on the boxplot x-axis(Price). The following insights are inferred from the plot. 
+To determine the most popular location in Abila, the visualisation in Figure \@ref(fig:boxplot2) shows the frequency of the transactions and the transaction prices for each location. The plot *Number of transactions per day by location* shows which location had the highest number of transaction each day separated by time period and the weekends are shaded in grey. The plot *Boxplot of transaction prices per location* shows the prices for each location. Log transformation was performed on the boxplot x-axis(Price). The following insights are inferred from the plot. 
 
 **1. Transactions occurring only on weekdays morning.**
 
@@ -275,7 +308,7 @@ To determine the most popular location in Abila, the visualisation in Figure \@r
 * *Coffee Cameleon* 
 * *Hallowed Grounds*
 
-The 3 location seems to be coffee shops based on their location name or logo and *Brew've Been Served* is the most popular location among them. Based on the locations, price and timestamp of the transactions, a possible deduction would be these coffee shops serves take-out coffee and are located in between employees home and GAStech. The median price of each transactions are similar for all 3 locations at around 12 dollars. From the map, *Coffee Cameleon* is the nearest to GAStech but *Brew've Been Served* has more transactions. making *Brew've Been Served* the most popular morning coffee take-out choice among the employees.
+The 3 location seems to be coffee shops based on their location name or logo and *Brew've Been Served* is the most popular location among them. Based on the locations, price and timestamp of the transactions, a possible deduction would be these coffee shops serves take-out coffee and are located in between employees home and GAStech. The median price of each transactions were similar for all 3 locations at around 12 dollars. From the map, *Coffee Cameleon* is the nearest to GAStech but *Brew've Been Served* has more transactions. making *Brew've Been Served* the most popular morning coffee take-out choice among the employees.
 
 **2. Transactions occurring only on weekdays afternoon.**
 
@@ -284,7 +317,7 @@ The 3 location seems to be coffee shops based on their location name or logo and
 * *Coffee Shack* 
 * *Jack's Magical Beans* 
 
-Based on the location name or logo, these 4 location seems to be food and beverage outlets. The median price for these locations range from 11 to 15 dollars. A possible deductions could be these location only operates on weekday lunch time and serves drinks such as coffee as they have similar price range as the take-out coffee mentioned previously. 
+Based on the location name or logo, these 4 location seems to be food and beverage outlets. The median price for these locations range from 12 to 15 dollars. A possible deductions could be these location only operates on weekday lunch time and serves drinks such as coffee as they have similar price range as the take-out coffee mentioned previously. 
 
 **3. Transactions occurring daily during the afternoon or night period.**
 
@@ -307,19 +340,21 @@ The 6 locations has transactions from both afternoon and night time period on al
 * *Abila Scrapyard*
 * *Abila Airport*
 
-These locations has higher median price compared to the others. The company name and logo suggests that the locations are customer or supplier of GAStech. As the bulk of transaction are the on the weekday, it can be speculated these locations are related to work. The higher median price value could be due to the purchase raw materials which translate to much higher price transacted on weekdays  onl. 
+These locations has higher median price compared to the others. The company name and logo suggests that the locations are customer or supplier of GAStech. As the bulk of transaction are on the weekday, a possible deduction would be these locations are related to work. The higher median price value could be due to the purchase raw materials which translate to much higher price transacted on weekdays only. 
 
 **5. Suspicious transaction.**
 
 * *Frydos Autosupply n' More*
 
-In the boxplot, there is an extreme outlier of a 10,000 dollars while the median price is only 149 dollars. This particular transaction was flagged out in the previous analysis of cc transaction that were not tagged to loyalty card. As individuals are more likely to use loyalty card in conjunction with the loyalty card, the scenario for this transaction further exacerbated the suspicion.
+In the boxplot, there is an extreme outlier of a 10,000 dollars while the median price was only 149 dollars. This particular transaction was flagged out in our previous analysis of cc transaction that were not tagged to loyalty card. As individuals are more likely to use loyalty card in conjunction with the loyalty card, the scenario for this transaction further exacerbated the suspicion.
 
 * *Kronos Mart*
-There were frequent transactions performed at *Kronos Mart* during the midnight period on Monday and both Sundays. The 5 transactions in the wee hours of the day is not common as it only occurs at one specific location. These 5 transactions performed were not tagged to a loyalty card as well. This raises suspicion on the cc owner. 
+
+There were frequent transactions performed at *Kronos Mart* during the midnight period on Monday and both Sundays. The 5 transactions in during midnight is not common and it only occurs only at one specific location. These 5 transactions performed were not tagged to a loyalty card as well. This raises suspicion on the cc owner. 
 
 * *Albert's Fine Clothing*
-In the boxplot, there is an extreme outlier of 1,239.41 dollars while the median is only 211.47 dollars. It is six times the median price which might be a suspicious transactions. However, looking at the frequency of transactions at *Albert's Fine Clothing*, it seems like a common place to buy clothing. Possible deduction was the person was buying lots of clothing for his family or friends, amounting to a much higher price than usual. 
+
+In the boxplot, there was an extreme outlier of 1,239.41 dollars while the median was only 211.47 dollars. It was six times the median price which might be a suspicious transactions. However, looking at the frequency of transactions at *Albert's Fine Clothing*, it seems like a common place to buy clothing. Possible deduction was the person was buying lots of clothing for his family or friends, amounting to a much higher price than usual. 
 
 ```{r boxplot2, eval=TRUE, echo=TRUE, layout="l-page", fig.align = 'center', fig.cap = 'Visualize transactions history',fig.width=20,fig.height=10}
 ## Data manipulation to add more factors
@@ -387,9 +422,15 @@ boxplot_p
  
 **2. Add the vehicle data to your analysis of the credit and loyalty card data. How does your assessment of the anomalies in question 1 change based on this new data? What discrepancies between vehicle, credit, and loyalty card data do you find?**
 
-2.1 The first anomaly to be investigated is the high transaction price of 10,000 dollars performed at *Frydos Autosupply n' More* on 13/01/2014 night from cc 9951. Based on the location name and logo, it is highly likely to be a mechanic repair shop for vehicle. The transaction without a matching loyalty card transaction made it more suspicious. The transaction records for cc 9951 was extracted and observed for 13/01/2014. There was 5 transactions made and 3 of them did not match the loyalty card transaction data. This eliminates the possibility of the owner forgetting to bring his/her loyalty card for the day. There were two transactions made with a time difference of 10 minutes and one of them did not use the loyalty card during both afternoon and night time period each. To further analyse the transactions, the gps log data was visualise on Abila map.
+The GPS dataset has rows of GPS coordinates that were logged every few seconds. This signifies that the car was moving and logging different GPS coordinates. The data was transformed to only keep the stationary GPS coordinate for each car by determining rows where the time lag between subsequent GPS log by each car id was more than 5 minutes. 5 minutes was selected because the waiting time at a traffic lights is around 3 to 5 minutes hence the upper bound was chosen to eliminate situations where the stationary GPS coordinates were due stoppage at traffic lights.
 
-```{r, echo=TRUE, eval=TRUE, }
+**2.1** The first anomaly to be investigated is the high transaction price of 10,000 dollars performed at *Frydos Autosupply n' More* on 13/01/2014 night by cc 9951. 
+
+Based on the location name and logo, it is highly likely to be a mechanic repair shop for vehicle. The transaction without a matching loyalty card transaction made it more suspicious. The transaction records for cc 9951 was extracted and observed for 13/01/2014 in table 2.
+
+There were 5 transactions made and 3 of them did not match the loyalty card transaction data. This eliminates the possibility of the owner forgetting to bring his/her loyalty card for that particular  day. There were two transactions made with a time difference of 10 minutes and one of them did not use the loyalty card during both afternoon and night time period each. To further analyse the transactions, the gps log data was visualise on Abila map.
+
+```{r, echo=TRUE, eval=TRUE,layout="l-body-outset" }
 ## Transactions on 13/01/2014 at "Frydos Autosupply n' More"
 knitr::kable(final_trans_1 %>% 
       filter(last4ccnum==9551 & date == dmy(13012014)) %>%
@@ -398,17 +439,21 @@ knitr::kable(final_trans_1 %>%
       caption="Table of transaction for cc 9951 on 13/01/2014") 
 ```
 
-Figure \@ref(fig:map1) shows all the GPS travel route for 13/01/2014. From Figure \@ref(fig:boxplot2) frequency plot for each location, we observe that there is only 2 transaction performed at *U-Pump* throughout the 2 weeks data. Hovering around the gps lines right on top of *U-Pump* reveals that only car id 24 visited the location. Since *U-Pump* is a petrol kiosk, we can confidently say that car id 24 owner used cc 9951 to make a transaction at "U-Pump". Car id 24 GPS line was marked in red and the start and stop coordinates after a 5 minutes window are indicated as the blue dots. Hovering over the blue dot near *U-Pump* on the map or the heatmap shows the car stopping at 12:35:15 and leaving at 13:22:01. This matches the transaction at *U-Pump* perform at 13:18:00. With a strong possibility that car id 24 uses cc 9951, the heatmap of when the car is moving was plotted on Figure \@ref(fig:map1) too. The blue areas in the heatmap represents the time period where the vehicle is moving.
+Figure \@ref(fig:map1) shows all cars GPS travel lines for 13/01/2014. From Figure \@ref(fig:boxplot2) frequency plot for each location, we observe that there was only 2 transaction performed at *U-Pump* throughout the 2 weeks data. Hovering around the GPS lines right on top of *U-Pump* reveals that only car id 24 visited the location. Since *U-Pump* is a petrol kiosk, we can confidently say that car id 24 owner used cc 9951 to make a transaction at "U-Pump". 
 
-Thereafter, the car left *U-Pump* at 13:22:01 and arrive back in GAStech at 13:27:14. Hence, the transaction at 13:28:00 at *Hippokampos* is not possible.
+Car id 24 GPS line was marked in red and the stationary GPS coordinates were marked as blue dots. These blue dots will represent the GPS coordinates where the car was stationary at the particular location.
 
-In the evening, the car left GAStech at 17:57:01 and stop around Ipsilantou Avenue at 18:00:31 and subsequently drove off at 19:29:01. The 10,000 dollars transaction at *Frydos Autosupply n’ More* was performed at 19:20:00 which fits the car gps timeline. Although the car did not stop directly at *Frydos Autosupply n’ More*, the distance is around 500 metres and it is possible for the owner to walk on foot to make the 10,000 dollars transactions.
+Hovering over the blue dot near *U-Pump* on the map shows the car stopping at 12:35:15 and leaving at 13:22:01. This matches the transaction performed at *U-Pump* at 13:18:00. With a strong possibility that car id 24 uses cc 9951, the heatmap was used to visualise the time period for the day when the car is on the move. The horizontal blue bars in Figure \@ref(fig:map1) represents the time period when the car is moving.
+
+Thereafter, the car left *U-Pump* at 13:22:01 and arrived back in GAStech at 13:27:14. Hence, the transaction at 13:28:00 at *Hippokampos* was not possible.
+
+In the evening, the car GPS showed that it left GAStech at 17:57:01 and stop around Ipsilantou Avenue at 18:00:31 and subsequently drove off at 19:29:01. The 10,000 dollars transaction at *Frydos Autosupply n’ More* was performed at 19:20:00 which fits the car gps timeline. Although the car did not stop directly at *Frydos Autosupply n’ More*, the distance is around 500 metres and it is possible for the owner to walk on foot to make the 10,000 dollars transactions.
 
 Thereafter, the car started driving at 19:29:01 to the north and stop at 19:31:35. This eliminates the possibility of the transaction at 19:30:00 at *Ouzeri Elian*. 
 
-The combination of transaction data of cc 9551 records with car id 24 does not fit perfectly. An observation on the two possible transaction made on cc 9551 by car id 24 owner did not have a loyalty card transaction record matched. Similarly, the other two impossible transactions occurring were both matched to a loyalty card transaction. The trend further confirms that the transactions made on cc 9551 is very suspicious. 
+The combination of transaction data of cc 9551 records with car id 24 does not fit perfectly. An observation of the two possible transaction made on cc 9551 by car id 24 owner did not have a loyalty card transaction record matched. Similarly, the other two impossible transactions were both matched to a loyalty card transaction. The trend further confirmed that the transactions made on cc 9551 is extremely suspicious. Probable deduction would be cc 9551 does not belong to car id 24 while the real owner of cc 9551 was someone else who used it during the day too.
 
-```{r map1, eval=TRUE, echo=TRUE, layout="l-body-outset", fig.align = 'center', fig.cap = 'GPS data for 13/01/2014'}
+```{r map1, eval=TRUE, echo=TRUE, layout="l-page",fig.height=8, fig.align = 'center', fig.cap = 'GPS data for 13/01/2014'}
 ## Load Map and SHP file
 bgmap <- raster("datasets/MC2-tourist.tif")
 abila_st <- st_read(dsn="datasets/Geospatial", layer="Abila")
@@ -458,7 +503,7 @@ hm24<-ggplot(gps24, aes(x=start.time, y=id,
                   "\nCar stop time:",end.time,
                   "\nDriving time (mins):",time.diff))) +
   geom_tile_interactive(aes(fill=dummy)) +
-  xlab("Car ID") + theme(legend.position="none")
+  xlab("Time") + ylab("Car id")+theme(legend.position="none")
 
 
 ## Plot interactive map
@@ -476,9 +521,9 @@ tmap_leaflet(map1)
 girafe(ggobj=hm24)
 ```
 
-2.2 The second anomaly were the early morning transactions records at *Kronos Mart* from Figure \@ref(fig:boxplot2) frequency plot. Table 2 below displays all transactions records at *Kronos Mart*. There were five unusual transaction performed in the wee hours around 3am on three different days and three out of five occurred on 19/01/2014. 
+**2.2** The second anomaly were the early morning transactions records at *Kronos Mart* from Figure \@ref(fig:boxplot2) frequency plot. Table 3 below displays all transactions records at *Kronos Mart*. Five out of the ten transactions were performed in the wee hours around 3am on three different days and three out of the five occurred on 19/01/2014. These few transactions were particularly unusual and further investigation was conducted.  
 
-```{r, echo=TRUE, eval=TRUE, }
+```{r, echo=TRUE, eval=TRUE,layout="l-body-outset" }
 ## Transactions on 13/01/2014 at "Frydos Autosupply n' More"
 knitr::kable(final_trans_1 %>% 
       filter(location == "Kronos Mart") %>%
@@ -488,11 +533,11 @@ knitr::kable(final_trans_1 %>%
 
 ```
 
-The GPS records for 19/01/2014 were visualised to investigate the transactions. From Figure \@ref(fig:map2), there was no GPS data that passed by nor stop in the vicinity of *Kronos Mart*. The closest stop location was at *ROBERTS AND SONS* at 13:20:06 to 14:23:01 by car id 30 represented by the blue dot. The timing of the transaction does not coincide with the cc transaction timing. 
+The GPS records for 19/01/2014 were visualised to investigate the transactions. From Figure \@ref(fig:map2), there was no GPS data that passed by nor stop in the vicinity of *Kronos Mart* on 19/01/2014. The closest stop location was at *ROBERTS AND SONS* at 13:20:06 to 14:23:01 by car id 30 represented by the blue dot. The timing of the transaction does not coincide with the cc transaction timing. 
 
-Hence, possible deduction could be that cc owners of 3484, 9551 and 8332 stays within walking distance to *Kronos Mart*, therefore eliminating the need to drive there. Another possibility is that the owners of the cc used their own personal vehicles to get there, resulting in no GPS record for employees issued vehicles. Coincidentally, cc 9551 also appeared in these transaction, which warrants additional investigation.
+Hence, possible deduction could be that cc owners of 3484, 9551 and 8332 stays within walking distance to *Kronos Mart*, therefore eliminating the need to drive their employee car to the location. Another possibility is that the owners of the cc used their own personal vehicles to get there, resulting in no GPS record for employees issued vehicles. Coincidentally, cc 9551 also appeared in these transaction, which warrants additional investigation.
 
-```{r map2, eval=TRUE, echo=TRUE, layout="l-body-outset", fig.align = 'center', fig.cap = 'GPS data for 19/01/2014'}
+```{r map2, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8,fig.align = 'center', fig.cap = 'GPS data for 19/01/2014'}
 ## Map geometry for 19012014
 gps_sf2 <- gps_sf %>% filter(as.Date(gps_sf$timestamp) == dmy(19012014))
 gps_path2 <- gps_sf2 %>% group_by(id) %>% 
@@ -514,17 +559,21 @@ map2<-tm_shape(bgmap) +
 tmap_leaflet(map2)
 ```
 
-2.3 Lastly, we will cross-check and validate the gps movement data with the transaction frequency at each location. We will first validate the weekday movement. From the earlier portions, there three groups of transaction data, weekday morning transaction only, weekday afternoon transactions only and high value transactions on weekdays only. The map with GPS movement on 07/01/2014 was visualise in Figure \@ref(fig:map3). 
+**2.3** Lastly, we will cross-check and validate the GPS data with the frequency of transactions at each location. We will first validate the weekday movement. From the earlier section, there were three groups of transaction data: weekday morning transaction only, weekday afternoon transactions only and high value transactions on weekdays only. The map with GPS movement on 07/01/2014 was visualise in Figure \@ref(fig:map3) as there were transactions performed on that day at all of the locations. 
 
 * *Transactions occurring only on weekdays morning*
 
-The car stationary position in blue dots for *Coffee Cameleon* and *Hallowed Grounds* fits the transaction data. However, for *Brew’ve Been Served*, there was no stationary position and timing on the map logo that fits the transaction timing. However, looking slightly south near the main road of Ipsilantou Avenue, there are multiple stop position in the morning fits the transaction timing. This might be due to the misrepresentation of the location logos on the map. 
+The car GPS stationary coordinates in blue dots for *Coffee Cameleon* and *Hallowed Grounds* fits the transaction data. However, the blue dots directly on *Brew’ve Been Served* logo in the map shows that the timing of the stationary coordinates were mainly in the afternoon or evening. This does not match the transaction timing at *Brew’ve Been Served*. However, looking slightly south near the main road of Ipsilantou Avenue, there were multiple GPS stationary coordinates in the morning and they fit the transaction timing at *Brew’ve Been Served*. This might be due to the misrepresentation of the location logo on the map. 
 
 * *Transactions occurring only on weekdays afternoon*
 
-There are 4 locations that are in this group. Based on the 4 locations name and logo, they seems to be similar to the earlier group consisting of coffee shops. Table 3 shows the 13 transactions at the 4 locations on 07/01/2014. Among the 13 transaction, a common trend was the exact same timestamp at 12:00. However, looking at the GPS stationary positions at those location, the GPS timestamp are in the morning before 09:00 where employees would visit before heading to GAStech for work. The occurrence was spread among different locations around Abila with different cc whereas the cc transactions at other locations are captured accurately. A possible deduction could be due to faulty Point of Sales (POS) machinesat those locations. Alternatively, it might be possible that they are using the same type of POS machine which perform batch processing instead of real-time processing for cc transactions. 
+There are 4 locations that are in this group. Based on the 4 locations name and logo, they seems to be similar to the earlier group consisting of coffee shops. 
 
-```{r, echo=TRUE, eval=TRUE, }
+Table 4 shows the 13 transactions at the 4 locations on 07/01/2014. A common trend observed was the exact same timestamp of 12:00 on all 13 transactions. However, looking at the GPS stationary positions at those location, the GPS stationary coordinates timestamp were in the morning before 09:00 where employees would presumably visit before heading to GAStech for work. 
+
+The 4 locations were spread around Abila, and the occurrence of mismatch GPS stationary timestamp were consistent. A possible deduction could be due to faulty Point of Sales (POS) machines at those locations. Alternatively, it might be possible that they are using the same type of POS machine that performed batch processing instead of real-time processing for cc transactions which process at 12:00 daily.
+
+```{r, echo=TRUE, eval=TRUE,layout="l-body-outset" }
 ## Transactions on 13/01/2014 at "Frydos Autosupply n' More"
 knitr::kable(final_trans_1 %>% 
       filter((location == "Jack's Magical Beans" |
@@ -539,9 +588,9 @@ knitr::kable(final_trans_1 %>%
 
 * *Higher value transactions on weekdays only*
 
-Based in the 7 locations name and logo, they are likely to be industrial Places of Interest (POI). Observation from the stationary GPS represented by the blue dots at these locations reveals that only truck drivers with car id 100 and above visited those locations. The GPS timestamp also matches the cc transaction timestamp. Hence, a possible deduction is that these 7 locations are close partners with GAStech and the payment are made by the lorry truck driver during the weekdays. This will align with the fact that lorry driver can only visit on weekday working hours. 
+Based on the 7 locations name and logo, they are likely to be industrial Places of Interest. Observation from the stationary GPS represented by the blue dots at these locations revealed that only truck drivers with car id 100 and above visited these locations. The stationary GPS timestamp also matches the cc transaction timestamp. Hence, a possible deduction is that these 7 locations are businesses that are close partners with GAStech and the payment were made by the lorry truck driver during the weekdays. This will align with the fact that lorry driver vehicles only operates on weekday working hours. 
 
-```{r map3, eval=TRUE, echo=TRUE, layout="l-body-outset", fig.align = 'center', fig.cap = 'GPS data for 07/01/2014'}
+```{r map3, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8,fig.align = 'center', fig.cap = 'GPS data for 07/01/2014'}
 ## Map geometry for 07012014
 gps_sf3 <- gps_sf %>% filter(as.Date(gps_sf$timestamp) == dmy(07012014))
 gps_path3 <- gps_sf3 %>% group_by(id) %>% 
@@ -566,10 +615,12 @@ tmap_leaflet(map3)
 
 In order to tag the owners of each credit card and loyalty card to the car id, we would need to combine several factors together to triangulate the results. The two conditions that will be used to triangulate the data between the three datasets are:
 
-1. CC transaction timestamp has to be between the car GPS stop timestamp and the subsequent start timestamp.
-2. GPS location has to be within reasonable radius of the location coordinates.
+1. CC transaction timestamp has to be between the time period where the car stopped moving which signify the car reaching its location and the subsequent timestamp that the car starts moving, signifying when the car left the location. By using the stationary GPS stop timestamp and the subsequent GPS timestamp, we can narrow down the selection.
+2. Car stationary GPS coordinates has to be within reasonable radius of the location coordinates.
 
-The locations would be mapped with the tourist map of Abila. However, the tourist map do not have all the POI marked that allows a full join with the locations in the cc transaction data. Table 4 shows the locations without a coordinate reference on the tourist map of Abila. Ranking the number of transaction at each location in descending order, there are high number of transactions at those locations and the need for its GPS coordinate is necessary for linking the cc to car id. 
+The locations coordinates would be assigned by referencing the tourist map of Abila. However, from the earlier section, we discovered that the tourist map provided might not be accurate in locating the location coordinates as the icons on the tourist map might not represent the exact coordinates of the location.
+
+Furthermore, the tourist map do not have all the locations marked by its logo which will not allows a full join with the locations in the cc transaction data. Table 5 shows the locations from the cc dataset whose logo could not be located visually on the tourist map of Abila. Ranking the number of transaction at each location in descending order, there are high volume of transactions at those locations and the need to map their GPS coordinate is necessary. 
 
 ```{r, echo=TRUE, eval=TRUE }
 ## Transactions on 13/01/2014 at "Frydos Autosupply n' More"
@@ -589,9 +640,11 @@ knitr::kable(locations %>%
       caption="Table of location with no traceable coordinates") 
 ```
 
-Figure \@ref(fig:map4) shows the map marked with blue dots representing the stationary position of the cars. The popular locations are reflected by the frequency of the blue dots on the map. Cross referencing with the transactions table, the locations coordinates are tag with their corresponding coordinates by cross-referencing to the car GPS data and geo-referenced data.
+Figure \@ref(fig:map4) shows the map marked with blue dots representing the stationary GPS coordinate of all the cars except for each employee house. The popular locations can be determined by the frequency of the blue dots at a particular location on the map. 
 
-```{r map4, eval=TRUE, echo=TRUE, layout="l-body-outset", fig.align = 'center', fig.cap = 'GPS stationary locations'}
+Cross referencing with the transactions table, the locations coordinates were tag with their corresponding coordinates by cross-referencing to the car GPS data and geo-referenced data.
+
+```{r map4, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8, fig.align = 'center', fig.cap = 'GPS stationary locations'}
 ## Getting coordinates of car stop positions
 first_gps <- gps1 %>% group_by(id) %>% filter(row_number()==1) %>%
   mutate(start_vec=1, stop_vec=0)  %>% ungroup(id)
@@ -623,14 +676,20 @@ gps_pts <- gps1 %>% ungroup(id) %>%
          dummy=1) %>%
   mutate(start.gps=purrr::map(start.gps, st_point) %>% st_as_sfc(crs=4326))%>%
   mutate(end.gps=purrr::map(end.gps, st_point) %>% st_as_sfc(crs=4326))
-gps_stop_points <- gps_pts %>% dplyr::select(id, start.time, start.gps)
+car$CarID <- as_factor(car$CarID)
+gps_pts <- left_join(gps_pts, car, by=c("id"="CarID"))
+gps_stop_points1 <- gps_pts %>%
+  mutate(time.stop = difftime(next.start.time, end.time), 
+         time.stop = as.numeric(time.stop))%>% 
+  filter(time.stop < 300) %>% 
+  dplyr::select(id, start.time, start.gps)
 
 ## Generate map with the stop positions in blue dots
 tmap_mode("view")
 map_POI<-tm_shape(bgmap) +
   tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
          interpolate=TRUE, max.value=255) +
-  tm_shape(gps_stop_points)+
+  tm_shape(gps_stop_points1)+
   tm_dots(col="blue", shape=30,id="id",
           popup.vars=c("Car ID"="id", 
                        "Stationary timestamp" = "start.time", 
@@ -638,27 +697,85 @@ map_POI<-tm_shape(bgmap) +
 tmap_leaflet(map_POI)
 ```
 
-The car id are triangulated to match the cc transaction data by the two conditions mentioned earlier. However, there are few limitations by using such a methodology for tagging the owners. 
+The car id are triangulated by tabulating the centroid coordinates of the GPS data from the stationary GPS stop locations from the map. However, there are few limitations by using the methodology mentioned earlier for tagging the owners. 
 
 1. In the earlier section, 4 coffee shops were discovered whose cc transactions timestamp were all at 12:00 but the actual visit time by the employees were in the morning. The inaccuracy of the cc transactions timestamp made it impossible to tag them to the car GPS data.
-2. In the earlier section, the distance between car id 24 stop position to *Frydos Autosupply n' More* was 500 metres away. Locations might not have their dedicated carpark right next to them and some car owners are able to get on foot after parking at a nearby carpark.  Hence, the maximum distance of the car stop position to the location coordinates will be set at less than 500 metres, a reasonable distance for traveling on foot. 
+2. In the earlier section, the distance between car id 24 GPS stationary coordinates at *Frydos Autosupply n' More* was 500 metres away. Locations might not have their dedicated carpark right next to them and some car owners are able to get on foot after parking at a nearby carpark.  Hence, the maximum distance of the car stop position to the location coordinates will be set at less than 500 metres, a reasonable distance for traveling on foot. 
 3. Employees might not drive their issued car out when they perform the transaction using their cc. Examples could be car pooling for a meal or using their personal vehicles when making the transactions. This will result in a incomplete tagging of the car id GPS to the transaction data.
 
-Figure \@ref(fig:tagging) shows the percentage that we match between the car GPS and cc transaction data. Hovering over the boxes will display the most probable match using the highest percentage of car GPS and cc transaction match. The highest percentage match will be selected to tag the car id owner to the cc owner. From the plot, we observed that there are not many more than 75% matches between cc and car owners. 
+The interactive heatmap in Figure \@ref(fig:tagging) shows the percentage that were successfully match with the car GPS and cc transaction data by the conditions mentioned earlier. The histogram was also plotted to visualise the distribution of the result. From the two visualisation, we observed that the methodology yield some high percentage match for the car id owner with the cc owner. 
 
-```{r tagging, eval=TRUE, echo=TRUE, layout="l-body-outset", fig.align = 'center', fig.cap = 'Car GPS tagging to CC number', fig.width=20,fig.height=10}
+```{r tagging, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8, fig.align = 'center', fig.cap = 'Car GPS tagging to CC number', fig.width=20,fig.height=10}
 # Tagging location coordinates
 location_tag <- data.frame(location = c(locations$location,"GAStech"),
-  long =c(24.82592,24.84595,24.85102335,24.87766,24.85763,24.85093,24.90123,NA,
-          24.88092,24.89524,24.88978,24.86418,NA,24.86076,24.839871,24.90562,
-          24.85805,24.85805,24.90249 ,24.88592,24.85762335,24.87334,24.85238017,
-          24.84139,24.88552 ,NA,24.89989,24.88549,NA,24.87294,24.85633,NA,NA,
-          24.87149,24.87958),
-  lat = c(36.05096,36.07438,36.06346181,36.07552,36.07525,36.08182,36.05408,NA,
-          36.05852,36.07063,36.05467,36.07336,NA,36.0896,36.074093,36.06044,
-          36.05975,36.05975,36.05574,36.0637,36.07669852,36.06755,36.06583602,
-          36.06408,36.05844,NA,36.05451,36.05663,NA,36.05283,36.07528,NA,NA,
-          36.06777,36.04803))
+ long =c(centroid(rbind(c(24.82590612, 36.05102229),c(24.82591819, 36.05092013),c(24.82598413, 36.05097547)))[1],
+         centroid(rbind(c(24.84592966, 36.07443715),c(24.84598782, 36.07434876),c(24.84595026, 36.07437836)))[1],
+         centroid(rbind(c(24.85097804, 36.06349268),c(24.85099445, 36.06342076),c(24.85103178, 36.06348173)))[1],
+         centroid(rbind(c(24.87617634, 36.07713037),c(24.87621582, 36.07713598),c(24.87619872, 36.07715385)))[1],
+         centroid(rbind(c(24.85626503, 36.07529323),c(24.85631411, 36.07523202),c(24.85634841, 36.07528136)))[1],
+         centroid(rbind(c(24.85089145, 36.08172086),c(24.85096025, 36.08176242),c(24.85087799, 36.08180554)))[1],
+         centroid(rbind(c(24.90119998, 36.05402165),c(24.90128202, 36.05408823),c(24.90116585, 36.05411015)))[1],
+         NA,
+         centroid(rbind(c(24.88089399, 36.05851786),c(24.88092086, 36.05858619),c(24.8808655, 36.05856303)))[1],
+         centroid(rbind(c(24.8951996, 36.07073983),c(24.89517891, 36.07062423),c(24.89526281, 36.07069274)))[1],                         
+         centroid(rbind(c(24.88983886, 36.05469486),c(24.88978433, 36.05463184),c(24.88977321, 36.05467589)))[1],
+         centroid(rbind(c(24.86416839, 36.07332041),c(24.86417651, 36.07336116),c(24.86419582, 36.07332868)))[1],
+         NA,
+         centroid(rbind(c(24.86068835, 36.08962196),c(24.86068191, 36.08954231),c(24.8607611, 36.08960361)))[1],
+         centroid(rbind(c(24.84132949, 36.07213193),c(24.84134818, 36.07212045),c(24.4134819, 36.07212044)))[1],
+         centroid(rbind(c(24.905573, 36.06044638),c(24.90561679, 36.06033304),c(24.90568587, 36.06040053)))[1],
+         centroid(rbind(c(24.85804364, 36.05970763),c(24.8580772, 36.05975308),c(24.8579808, 36.05976284)))[1],
+         centroid(rbind(c(24.85804364, 36.05970763),c(24.8580772, 36.05975308),c(24.8579808, 36.05976284)))[1],
+         centroid(rbind(c(24.90096913, 36.05842562),c(24.90107066, 36.05844726),c(24.90097455, 36.05850897)))[1],
+         centroid(rbind(c(24.88586605, 36.063639),c(24.88595361, 36.06364584),c(24.88586737, 36.06371539)))[1],
+         centroid(rbind(c(24.85756422, 36.07660977),c(24.85763811, 36.07664766),c(24.857573, 36.07669909)))[1],
+         centroid(rbind(c(24.87330651, 36.06751231),c(24.87335583, 36.06750587),c(24.87333867, 36.06755141)))[1],                    
+         centroid(rbind(c(24.85237319, 36.06582037),c(24.85241027, 36.06582475),c(24.85237372, 36.06584816)))[1],
+         centroid(rbind(c(24.89986767, 36.05442391),c(24.89996154, 36.05448329),c(24.89987365, 36.05453273)))[1],
+         centroid(rbind(c(24.84983351, 36.06587998),c(24.84983936, 36.06582196),c(24.8497762, 36.06583535)))[1],
+         NA,
+         centroid(rbind(c(24.88551872, 36.05840982),c(24.88542068, 36.0584603),	c(24.88553455, 36.05844325)))[1],
+         centroid(rbind(c(24.83307421, 36.0653098),c(24.83314028, 36.06523446),	c(24.84143955, 36.06403449),c(24.84141463, 36.06410072)))[1],
+         NA,
+         centroid(rbind(c(24.87077341, 36.05196196),c(24.87081903, 36.05192066),c(24.87083665, 36.05197804)))[1],
+         centroid(rbind(c(24.85227441, 36.06324941),c(24.85226894, 36.06330479),c(24.8523291, 36.0632684)))[1],
+         NA,NA,
+         centroid(rbind(c(24.87148791, 36.06774029),c(24.8714995, 36.06774623),c(24.87149104, 36.06776587)))[1],
+         centroid(rbind(c(24.87956897, 36.04802112),c(24.8795714, 36.04804908),	c(24.8795745, 36.0480309)))[1]),
+ lat = c(centroid(rbind(c(24.82590612, 36.05102229),c(24.82591819, 36.05092013),c(24.82598413, 36.05097547)))[2],
+         centroid(rbind(c(24.84592966, 36.07443715),c(24.84598782, 36.07434876),c(24.84595026, 36.07437836)))[2],
+         centroid(rbind(c(24.85097804, 36.06349268),c(24.85099445, 36.06342076),c(24.85103178, 36.06348173)))[2],
+         centroid(rbind(c(24.87617634, 36.07713037),c(24.87621582, 36.07713598),c(24.87619872, 36.07715385)))[2],
+         centroid(rbind(c(24.85626503, 36.07529323),c(24.85631411, 36.07523202),c(24.85634841, 36.07528136)))[2],
+         centroid(rbind(c(24.85089145, 36.08172086),c(24.85096025, 36.08176242),c(24.85087799, 36.08180554)))[2],
+         centroid(rbind(c(24.90119998, 36.05402165),c(24.90128202, 36.05408823),c(24.90116585, 36.05411015)))[2],
+         NA,
+         centroid(rbind(c(24.88089399, 36.05851786),c(24.88092086, 36.05858619),c(24.8808655, 36.05856303)))[2],
+         centroid(rbind(c(24.8951996, 36.07073983),c(24.89517891, 36.07062423),c(24.89526281, 36.07069274)))[2],
+         centroid(rbind(c(24.88983886, 36.05469486),c(24.88978433, 36.05463184),c(24.88977321, 36.05467589)))[2],
+         centroid(rbind(c(24.86416839, 36.07332041),c(24.86417651, 36.07336116),c(24.86419582, 36.07332868)))[2],
+         NA,
+         centroid(rbind(c(24.86068835, 36.08962196),c(24.86068191, 36.08954231),c(24.8607611, 36.08960361)))[2],
+         centroid(rbind(c(24.84132949, 36.07213193),c(24.84134818, 36.07212045),c(24.4134819, 36.07212044)))[2],
+         centroid(rbind(c(24.905573, 36.06044638),c(24.90561679, 36.06033304),c(24.90568587, 36.06040053)))[2],
+         centroid(rbind(c(24.85804364, 36.05970763),c(24.8580772, 36.05975308),c(24.8579808, 36.05976284)))[2],
+         centroid(rbind(c(24.85804364, 36.05970763),c(24.8580772, 36.05975308),c(24.8579808, 36.05976284)))[2],
+         centroid(rbind(c(24.90096913, 36.05842562),c(24.90107066, 36.05844726),c(24.90097455, 36.05850897)))[2],
+         centroid(rbind(c(24.88586605, 36.063639),c(24.88595361, 36.06364584),c(24.88586737, 36.06371539)))[2],
+         centroid(rbind(c(24.85756422, 36.07660977),c(24.85763811, 36.07664766),c(24.857573, 36.07669909)))[2],
+         centroid(rbind(c(24.87330651, 36.06751231),c(24.87335583, 36.06750587),c(24.87333867, 36.06755141)))[2],
+         centroid(rbind(c(24.85237319, 36.06582037),	c(24.85241027, 36.06582475),c(24.85237372, 36.06584816)))[2],
+         centroid(rbind(c(24.89986767, 36.05442391),c(24.89996154, 36.05448329),	c(24.89987365, 36.05453273)))[2],
+         centroid(rbind(c(24.84983351, 36.06587998),c(24.84983936, 36.06582196),c(24.8497762, 36.06583535)))[2],
+          NA,
+         centroid(rbind(c(24.83307421, 36.0653098),c(24.83314028, 36.06523446),	c(24.84143955, 36.06403449),c(24.84141463, 36.06410072)))[1],
+         centroid(rbind(c(24.88551872, 36.05840982),c(24.88542068, 36.0584603),	c(24.88553455, 36.05844325)))[2],
+          NA,
+         centroid(rbind(c(24.87077341, 36.05196196),c(24.87081903, 36.05192066),c(24.87083665, 36.05197804)))[2],
+         centroid(rbind(c(24.85227441, 36.06324941),c(24.85226894, 36.06330479),c(24.8523291, 36.0632684)))[2],
+         NA,NA,
+         centroid(rbind(c(24.87148791, 36.06774029),c(24.8714995, 36.06774623),c(24.87149104, 36.06776587)))[2],
+         centroid(rbind(c(24.87956897, 36.04802112),c(24.8795714, 36.04804908),	c(24.8795745, 36.0480309)))[2]))
 location_tag <- location_tag %>% na.omit()
 location_tag <- st_as_sf(location_tag, coords=c("long","lat"), crs=4326)
 
@@ -684,54 +801,547 @@ trans_collapse <- cc %>%
   group_by(last4ccnum) %>% summarize(total=n())
 ## Limit to top 3 match only by percentage
 tagging_cc_gps <- left_join(tagging, trans_collapse, by=c("last4ccnum")) %>%
-  mutate(percent=round(tag/total*100),2) %>%
-  mutate(bin=case_when(percent < 75~ "<75%",
-                       percent >=75~ ">=75%"))
-top_match <- tagging_cc_gps %>% group_by(last4ccnum)%>%top_n(n=1,wt=percent)%>% 
-  rename(top_id=id, top_percent=percent) %>%
-  dplyr::select(last4ccnum, top_id,top_percent)
-tagging_cc_gps <- left_join(tagging_cc_gps,top_match,c=("last4ccnum"))
+  mutate(percent=round(tag/total*100,2))
 
-tag_plot<-ggplot(tagging_cc_gps, aes(x=id, y=last4ccnum, text=
-  paste("</br>The most probable owner for cc",last4ccnum,
-        "is the owner for car id",top_id,"at",top_percent,"%",
-        "</br>CC owner:",last4ccnum,
-        "</br>Car ID",id,
-        "</br>Percentage match:",percent,"%")))+
-  geom_tile(aes(fill=bin)) +
-  scale_fill_manual(values =c("sienna1", "navyblue")) +
+tag_plot<-ggplot(tagging_cc_gps, aes(x=id, y=last4ccnum,fill=percent))+
+  geom_tile() + scale_fill_gradient(low="sienna1", high="navyblue") +
   xlab("Car ID") +ylab("CC last 4 number")+ 
   labs(fill="% match")
-
-ggplotly(tag_plot, tooltip="text") %>% layout(hoverlabel=list(bgcolor="white"))
+histogram<-ggplot(tagging_cc_gps,aes(percent))+geom_histogram(binwidth=5)+
+  stat_function(fun=dnorm,aes(color="red"),
+                args=list(mean=mean(tagging_cc_gps$percent),
+                sd=sd(tagging_cc_gps$percent)))
+ggplotly(tag_plot) %>% layout(hoverlabel=list(bgcolor="white"))
+ggplotly(histogram) %>% layout(hoverlabel=list(bgcolor="white"))
 ```
 
-Hence, the best  way is to tag car id with cc number that has the highest percentage match. Thereafter, the car id number will be dropped from the dataframe and retag the remaining car id with cc number using the highest percentage match. This method is looped to map the car id owner to cc owner in a non-mutually exclusive methodology. Table 6 shows the full tagging of cc numbers to loyalty numbers to car id number to employees record.
+Hence, we can confidently infer that matches over 75% will be accurate. However, as there are more cc owners (55 unique owners) than car owners (35 unique car id) and the truck drivers share vehicles (5 unique truck id), we will drop the truck drivers with car id of 100 and above. Observation of the heatmap in figure \@ref(fig:tagging) reveals that car id 23, car id 29 and car id 30 has matches of more than one cc number and car id 28 does not have a match with more than 75%. 
+
+From Table 6, we observe that car id 23 matches to three unique cc number with matches over 75%. The highest percentage match to cc 3484 at 91.43% shows high probability for inference, hence the observation that matches to cc 8202 and 8411 will be dropped.
+
+For car id 29 and 30, the matches to cc number percentage are relatively high and defers less than 10%. Further investigation on the GPS map location will be performed to verify which match to retain. 
 
 ```{r, echo=TRUE, eval=TRUE}
-## Loop to tag the car id to cc number
-sample <- tagging_cc_gps
-final_tag<- tagging_cc_gps[0,]
-for (i in 1:nrow(sample)) {
-  a <- sample %>% ungroup() %>% top_n(1,wt=percent)
-  final_tag <- rbind(final_tag,a)
-  cc_num <- unique(a$last4ccnum)
-  id_num <- unique(a$id)
-  sample <- sample %>% ungroup()%>% 
-    filter(!(last4ccnum %in% cc_num) & !(id %in% id_num))
-}
-car$CarID <- as_factor(car$CarID)
-final_tag <- final_tag %>% dplyr::select(last4ccnum, id)
-final_cc <- final_trans %>% group_by(last4ccnum,loyaltynum_owner) %>% 
-  summarize(n=n()) %>% na.omit() %>% dplyr::select(-n)
-full_tagging <- left_join(final_cc, final_tag, by=c("last4ccnum")) %>% 
-  left_join(car, by=c("id"="CarID"), na_matches="never")
-knitr::kable(full_tagging, "simple",
-      caption="Table of employees record and their cc and loyalty number") 
+## Get the match of car id to cc last4ccnum
+tagging <- tagging_cc_gps %>% mutate(id=as.character(id), id=as.numeric(id)) %>% 
+  filter(percent>=75 & id<100)
+knitr::kable(tagging %>% filter(id==23 | id==29 | id==30) %>% 
+               arrange(id), "simple",
+      caption="Table of employees record and their cc and loyalty number")
+final_tagging <- tagging %>% 
+  filter(!(last4ccnum==8202 & id==23), !(last4ccnum==8411 & id ==23))
 ```
 
-The tagging of the cc and loyalty card numbers to each employee's was based on a best effort basis. It is an non exhaustive list and it requires further validation of data for confirmation of the tagging. The constraints in this methodology was described earlier in this section due to the uncertainties in the dataset.
+Investigation of car id 28 low cc transactions matches was visualised in Figure \@ref(fig:map5) and it revealed that the GPS coordinates of car id 28 has lots of noise. The noise in the GPS line caused a wider spread of GPS line in the visualisation on the map and also zig-zag incoherent GPS path. This most probably signifies a faulty GPS signal on the car. 
 
-**Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships.**
+Secondly, we observe that the stop position was not accurate. For example, the frequency of GPS stop coordinates at the extreme south of the map should be at GAStech. Hence, the GPS stop coordinates seems to deviate in the North-West direction. The most probable explanation will be a faulty GPS system since the GPS points were noisy and were not correctly geo-referenced on the map.
 
-test
+```{r map5, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8,fig.align = 'center', fig.cap = 'Original GPS for car id 28'}
+## Map geometry for original car id 28 data
+gps_sf5 <- gps_sf %>% filter(id==28)
+gps_path5 <- gps_sf5 %>% group_by(id) %>% 
+  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
+gps_28_points <- gps1 %>% filter(id ==28) %>% 
+  filter(start_diff>5 | stop_diff >5) %>% 
+  mutate(start_vec=ifelse(start_diff>5,1,0), stop_vec=ifelse(stop_diff>5,1,0))
+
+## Plot interactive map
+tmap_mode("view")
+map5<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_path5)+
+  tm_lines() +
+  tm_shape(gps_28_points)+
+  tm_dots(col="blue")
+tmap_leaflet(map5)
+```
+
+After re-calibrating the GPS coordinates for car id 28, Figure \@ref(fig:map6) shows the GPS movement data for car id 28. With the re-calibrated GPS data, we would match it with the cc transaction data to infer which cc belongs to car id 28. 
+
+From the map in Figure \@ref(fig:map6), the unqiue observation was that car id 28 visited *Ahaggo Museum* on the 18th and 19th of Jan and frequently patronise *Jack's Magical Beans* and *Ouzeri Elian* over the two weeks. 
+
+From the cc transaction table, a search of *Ahaggo Museum* revealed that cc 1286, 7384 and 9241 made transactions on the 18th and 19th of Jan. Next, a search of *Jack's Magical Beans* shows that only cc 9241 out of the three cc made transactions at the location. Lastly, a search of *Ouzeri Elian* on the datatable reveals that cc 9241 made 6 transactions at the location. Hence, we are confident to infer that car id 28 is the owner of cc 9241.
+
+```{r map6, eval=TRUE, echo=TRUE, layout="l-page",fig.height=8, fig.align = 'center', fig.cap = 'Re-calibrated GPS for car id 28'}
+## Map geometry for re-calibrated Car id 28
+gps28 <- gps %>% filter(id==28) %>% 
+  mutate(long = long +0.005,
+         lat=lat-0.002)
+gps_sf28 <- st_as_sf(gps28, coords=c("long","lat"), crs=4326)
+gps_path28 <- gps_sf28 %>% group_by(id) %>% 
+  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
+gps28_pt <- st_as_sf(gps28, coords=c("long","lat"), crs=4326)
+gps28_pt <- gps28_pt %>% 
+  group_by(id) %>% arrange(timestamp) %>%
+  mutate(start_diff= as.numeric(timestamp - lag(timestamp,default=first(timestamp)))/60,
+         stop_diff= as.numeric(lead(timestamp)-timestamp)/60,
+         date = as.Date(timestamp)) %>%
+  rename(gps.coord=geometry) %>% 
+  filter(start_diff>5 | stop_diff >5) %>% 
+  mutate(start_vec=ifelse(start_diff>5,1,0), stop_vec=ifelse(stop_diff>5,1,0))
+
+## Plot interactive map
+tmap_mode("view")
+map6<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_path28)+
+  tm_lines() +
+  tm_shape(gps28_pt)+
+  tm_dots(col="blue")
+tmap_leaflet(map6)
+final_tagging <- final_tagging %>% 
+  dplyr::select(last4ccnum, id) %>% 
+  mutate(last4ccnum = as.character(last4ccnum),
+         id = as.character(id)) %>% 
+  bind_rows(c(last4ccnum="9241", id="28"))
+```
+
+Next, we will focus on car id 29 where it matches 90% of cc 3547 transactions and 100% of cc 5921. The high proportion of matches on both credit card warrants some investigation into the data. 
+
+Looking at table 7 for both cc number, we observe that cc 3547 has transactions between 12/01/2014 to 19/01/2014 and cc 5921 has transactions between 06/01/2014 to 10/01/2014. Cross-referencing the GPS data for car id 29 in Figure \@ref(fig:map7), we can observe that the cc transactions matches the GPS data of car id 29. A possible deduction is that the owner of car id 29 used both cc card as there was no overlap in the transaction dates for both cc. Possible scenario could be that the owner switch the CC from 5921 to 3547 after 10/01/2014. However, there might be missing data on 11/01/2014 where it was not captured on both cc. Hence, we will tag car id 29 to both cc 5921 and 3547.
+
+```{r map7, eval=TRUE, echo=TRUE, layout="l-body-outset", fig.height=8,fig.align = 'center', fig.cap = 'GPS for car id 29'}
+gps_sf29 <- gps_sf %>% filter(id==29)
+gps_path29 <- gps_sf29 %>% group_by(id) %>% 
+  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
+gps29_pt <- gps_stop_points1 %>% filter(id==29)
+tmap_mode("view")
+map7<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_path29)+
+  tm_lines() +
+  tm_shape(gps29_pt)+
+  tm_dots(col="blue")
+cc3547 <- cc %>% filter(last4ccnum==3547) %>% dplyr::select(-datetime, -date)
+cc5921 <- cc %>% filter(last4ccnum==5921) %>% dplyr::select(-datetime, -date)
+knitr::kable(list(cc3547,cc5921),caption="Transactions for CC 3547 & 5921")
+tmap_leaflet(map7)
+```
+
+Lastly, we will look at car id 30 with cc 6901 and 8202. The GPS data for car id 30 was visualise in Figure \@ref(fig:map8) and the transaction from cc 6901 and 8202 in table 8. 
+
+Comparing the GPS data map and cc translation data, we focused on locations with a lower frequency of visit and locations in a less congested area for easier verification. From the 3 locations and transaction details below, we can deduce that cc 6901 matches car id 30.
+
+1. GPS data showed a visit to *Ouzeri Elian* on 07/01/2014 and only cc 6901 has matching transaction. 
+2. GPS data showed visits to *Kalami Kafenion* on 15/01/2014 and 18/01/2014 and only cc 6901 has matching transaction for both days.
+3. GPS data showed visits to *Hippokampos* on 10/01/2014 and 14/01/2014 and only cc 6901 has matching transaction for both days.
+
+```{r map8, eval=TRUE, echo=TRUE, layout="l-page", fig.align = 'center', fig.cap = 'GPS for car id 30',fig.height=8}
+gps_sf_30 <- gps_sf %>% filter(id==30)
+gps_path_30 <- gps_sf_30 %>% group_by(id) %>%
+  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
+gps_stop_points30 <- gps_pts %>%
+  mutate(time.stop = difftime(next.start.time, end.time), 
+         time.stop = as.numeric(time.stop))%>% 
+  filter(time.stop < 300 & id==30) %>% 
+  dplyr::select(id, start.time, start.gps)
+
+## Plot interactive map
+tmap_mode("view")
+map8<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_path_30) +
+  tm_lines(col ="red") +
+  tm_shape(gps_stop_points30)+
+  tm_dots(col="blue", shape=30)
+tmap_leaflet(map8)
+```
+
+```{r table8, eval=TRUE, echo=TRUE, layout="l-page", fig.align = 'center', fig.cap = 'Transaction data for CC 6901 & 8202'}
+cc6901 <- cc %>% filter(last4ccnum==6901) %>% dplyr::select(-datetime, -date)
+cc8202 <- cc %>% filter(last4ccnum==8202) %>% dplyr::select(-datetime, -date)
+knitr::kable(list(cc6901,cc8202),caption="Transactions for CC 6901 & 8202")
+
+final_tagging <- final_tagging %>% ungroup() %>% 
+  filter(!(last4ccnum=="8202"& id=="30")) %>% 
+  mutate(id=as_factor(id)) %>% 
+  left_join(car, by=c("id"="CarID")) %>% 
+  mutate(name=paste(LastName,FirstName))
+```
+
+The tagging of all 35 car owners (excluding truck drivers) have been completed and verified. 
+
+**4. Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships.**
+
+To visusalise potential relationships relationships, network analysis was used to look at the relationships. Figure \@ref(fig:network1) shows an interactive network analysis of each car ID employee and the locations that they made transactions at with their GAStech cc. From the network analysis throughout the two weeks of data, we can uncover some relationships among employees.
+
+```{r network1, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE, layout="l-body-outset", fig.align = 'center', fig.height=6, fig.cap = 'Network analysis by location and employee'}
+cc_data <- cc %>% mutate(day=lubridate::day(datetime), hour=lubridate::hour(datetime))
+sources <- cc_data %>% mutate(hour=lubridate::hour(datetime)) %>% 
+  distinct(last4ccnum) %>% left_join(final_tagging, by=c("last4ccnum")) %>% 
+  mutate(name=paste(LastName,FirstName)) %>% 
+  rename(label = name) %>% drop_na(id) %>%
+  mutate(CurrentEmploymentType=ifelse(is.na(CurrentEmploymentType),"Driver",CurrentEmploymentType))
+destinations <- cc_data  %>% 
+  distinct(location) %>%
+  rename(label = location)
+cc_nodes <- full_join(sources, 
+                      destinations, 
+                      by = "label") %>% rename(car_id=id)
+cc_nodes <- cc_nodes %>% 
+  rowid_to_column("id") %>%
+  mutate(CurrentEmploymentType=ifelse(is.na(CurrentEmploymentType),
+                                      "Locations",CurrentEmploymentType),
+         title=label) %>% 
+  rename(group=CurrentEmploymentType)
+edges <- cc_data %>% 
+  mutate(last4ccnum = as.character(last4ccnum)) %>%  
+  filter(last4ccnum %in% final_tagging$last4ccnum) %>% 
+  group_by(last4ccnum, location, day, hour) %>%
+  summarise(weight = n()) %>% 
+  ungroup()
+cc_edges <- edges %>% 
+  inner_join(cc_nodes,by = c("last4ccnum")) %>% 
+  rename(from = id)
+cc_edges <- cc_edges %>% 
+  inner_join(cc_nodes,by = c("location" = "label")) %>% 
+  rename(to = id) %>% 
+  dplyr::select(from, to,day, hour, weight) %>% 
+  mutate(time_bin = case_when(hour>=0&hour<6~"Midnight",
+                              hour>=6&hour<12~"Morning",
+                              hour>=12&hour<18~"Afternoon",
+                              hour>=18~"Night"),
+         weekday.weekend = ifelse(day %in% c(11,12,18,19),"Weekend","Weekday"),
+         day.week = case_when(day==6|day==13~"Monday",
+                              day==7|day==14~"Tuesday",
+                              day==8|day==15~"Wednesday",
+                              day==9|day==16~"Thursday",
+                              day==10|day==17~"Friday",
+                              day==11|day==18~"Saturday",
+                              day==12|day==19~"Sunday",))
+
+visNetwork(cc_nodes, cc_edges, main="Network analysis by location and employee") %>% 
+  visIgraphLayout(layout = "layout_on_grid") %>% 
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>% 
+  visLegend()
+```
+
+1. *Desafio Golf Course* was visited by GAStech Executives only. Based on figure \@ref(fig:boxplot1), we observed that there are only cc transactions made on Sunday at the location. Hence, we can infer that all five executive of GAStech might have some after working hours relationship by gathering at the *Desafio Golf Course* on both Sundays. They might be playing golf or a regular gathering at the location.
+2. *Chostus Hotel* was visited by Orilla Elsa, Tempestad Brand and Sanjorge Jr.	Sten throughout the 2 weeks of data. Table 9 below shows the transaction at Chostus Hotel only and we can observe that Orilla Elsa and Tempestad Brand made transactions on 4 separate dates during lunch. The transactions were relatively expensive for a lunch meal in comparison to other food and beverage location in Abila. Alternatively, they might have paid for a hotel room during their visit to the location. Furthermore, both of them are from the same department with the same title in GAStech and there might be some relationship between them.
+
+```{r, echo=TRUE, eval=TRUE,layout="l-body-outset"}
+knitr::kable(cc %>% mutate(last4ccnum=as.character(last4ccnum)) %>% 
+               left_join(final_tagging, by=c("last4ccnum")) %>% 
+               filter(location=="Chostus Hotel") %>% 
+               select(name, CurrentEmploymentType, CurrentEmploymentTitle,
+                      location, timestamp, price),
+             caption="Table of transaction at Chostus Hotel")
+```
+
+3. *Bean There Done That* location had only transactions made by the engineering department (yellow nodes in figure \@ref(fig:network1)). *Bean There Done That* is the furthest location from GAStech but a certain group of customer still visits and purchase from them. Visualising the GPS stationary data for the 7 customers from the engineering team in figure \@ref(fig:map-bean), we observe that 5 out of 7 of the customers resides in the area of Carnero Street and Parla Park whereas the remaining 2 customers, Frente Birgitta and Dedos Lidelse resides between Arkadiou Park and Sannan Park. The 2 customers residential location are at the same coordinates yet far away from *Bean There Done That*. However, they still patronise and purchase from there might signify some relationship between both of them.
+
+```{r map-bean, fig.align = 'center', layout="l-page", fig.cap = 'Stationary GPS points of Bean There Done That customers',fig.height=8}
+bean_cust <- final_tagging %>% filter(name == "Frente Birgitta"|
+                                      name == "Calzas Axel"|
+                                      name == "Frente Vira"|
+                                      name == "Azada Lars"|
+                                      name == "Balas Felix"|
+                                      name == "Dedos Lidelse"|
+                                      name == "Cazar Gustav")
+gps_stop_points_bean <- gps_pts %>%
+  filter(id %in% bean_cust$id) %>% 
+  mutate(time.stop = difftime(next.start.time, end.time,units=c("mins")), 
+         time.stop = as.numeric(time.stop),
+         name=paste(LastName,FirstName))%>% 
+  filter(time.stop < 300 ) %>% 
+  dplyr::select(id, start.time, start.gps,name) %>% 
+  mutate(id=as.character(id))
+
+## Plot interactive map
+tmap_mode("view")
+map_bean<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_stop_points_bean)+
+  tm_dots(col="name",palette="Dark2",id="start.time")
+
+tmap_leaflet(map_bean)
+```
+
+To investigate non-official relationships, we will focus on after working hours transactions. The network analysis was drilled down to transactions performed on Weekday Nights only and dining locations that had transactions in the afternoon or night to reduce cluttering of the network analysis. Figure \@ref(fig:network2) shows the network analysis for weekday nights transactions only. The edge line connecting the employees to location are colored by day to visualize if any group of employees visited a particular location on the same day in the night.
+
+```{r network2, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE, layout="l-body-outset", fig.align = 'center', fig.cap = 'Network analysis on Weekday Night',fig.height=6}
+sources <- cc_data %>% mutate(hour=lubridate::hour(datetime)) %>% 
+  distinct(last4ccnum) %>% left_join(final_tagging, by=c("last4ccnum")) %>% 
+  mutate(name=paste(LastName,FirstName)) %>% 
+  rename(label = name) %>% drop_na(id) %>% 
+  mutate(CurrentEmploymentType=ifelse(is.na(CurrentEmploymentType),
+                                      "Driver",CurrentEmploymentType))
+destinations <- cc_data  %>% 
+  filter(location =="Ouzeri Elian"|
+         location=="Guy's Gyros"|
+         location=="Katerina's Cafe"|
+         location=="Hippokampos"|
+         location=="Abila Zacharo"|
+         location=="Gelatogalore"|
+         location=="Kalami Kafenion"|
+         location=="Chostus Hotel") %>% 
+  distinct(location) %>%
+  rename(label = location)
+cc_nodes <- full_join(sources, 
+                      destinations, 
+                      by = "label") %>% rename(car_id=id)
+cc_nodes <- cc_nodes %>% 
+  rowid_to_column("id") %>%
+  mutate(CurrentEmploymentType=ifelse(is.na(CurrentEmploymentType),
+                                      "Locations",CurrentEmploymentType),
+         title=label) %>% 
+  rename(group=CurrentEmploymentType)
+edges <- cc_data %>% 
+  mutate(last4ccnum = as.character(last4ccnum)) %>%  
+  filter(last4ccnum %in% final_tagging$last4ccnum) %>% 
+  group_by(last4ccnum, location, day, hour) %>%
+  summarise(weight = n()) %>% 
+  ungroup()
+cc_edges <- edges %>% 
+  inner_join(cc_nodes,by = c("last4ccnum")) %>% 
+  rename(from = id)
+cc_edges <- cc_edges %>% 
+  inner_join(cc_nodes,by = c("location" = "label")) %>% 
+  rename(to = id) %>% 
+  dplyr::select(from, to,day, hour, weight) %>% 
+  mutate(time_bin = case_when(hour>=0&hour<6~"Midnight",
+                              hour>=6&hour<12~"Morning",
+                              hour>=12&hour<18~"Afternoon",
+                              hour>=18~"Night"),
+         weekday.weekend = ifelse(day %in% c(11,12,18,19),"Weekend","Weekday"),
+         day.week = case_when(day==6|day==13~"Monday",
+                              day==7|day==14~"Tuesday",
+                              day==8|day==15~"Wednesday",
+                              day==9|day==16~"Thursday",
+                              day==10|day==17~"Friday",
+                              day==11|day==18~"Saturday",
+                              day==12|day==19~"Sunday",))
+cc_edges_dn<- cc_edges %>% 
+  filter(time_bin=="Night", weekday.weekend=="Weekday") %>% 
+  mutate(color=rainbow(max(day))[day])
+# cc_edges_dn$color <- palette(rainbow(7))[cc_edges_dn$day]
+visNetwork(cc_nodes, cc_edges_dn, 
+           main="Network analysis by location and employee") %>% 
+  visIgraphLayout(layout = "layout_on_grid") %>% 
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
+  visEdges(smooth=FALSE, color="color") %>% 
+  visLegend()
+```
+
+1. Employee Baza Isak and Calixto Nils patronised *Ouzeri Elian* on several night at the same time. From table 10, we observe that on 08/01 and 16/1, Baza Isak and Calixto Nils transaction timing were only 1 minute apart and on 17/1, both had transactions in the evening. A probable deduction could be that they are of good friends since they are in the same department who hang out and have dinner together after working hours. 
+
+```{r, echo=TRUE, eval=TRUE,layout="l-body-outset"}
+final_cc <- cc %>% mutate(left4ccnum=as.character(last4ccnum)) %>% 
+  left_join(final_tagging, by="last4ccnum") %>% 
+  mutate(day=lubridate::day(datetime), hour=lubridate::hour(datetime),
+         time_bin = case_when(hour>=0&hour<6~"Midnight",
+                              hour>=6&hour<12~"Morning",
+                              hour>=12&hour<18~"Afternoon",
+                              hour>=18~"Night"),
+         weekday.weekend = ifelse(day %in% c(11,12,18,19),"Weekend","Weekday"),
+         day.week = case_when(day==6|day==13~"Monday",
+                              day==7|day==14~"Tuesday",
+                              day==8|day==15~"Wednesday",
+                              day==9|day==16~"Thursday",
+                              day==10|day==17~"Friday",
+                              day==11|day==18~"Saturday",
+                              day==12|day==19~"Sunday",))
+knitr::kable(final_cc %>% 
+             filter(weekday.weekend=="Weekday"&time_bin=="Night") %>% 
+             filter(location =="Ouzeri Elian"&(name=="Baza Isak"|name=="Calixto Nils")) %>% 
+             select(location, datetime, name, price, CurrentEmploymentType,CurrentEmploymentTitle)
+               , "simple",
+      caption="Baza Isak and Calixto Nils transactions at Ouzeri Elian on Weekdays Nights")
+```
+
+Apart from the transactional data performed by employees, we will look into the GPS data to observe for any gathering and potential relationships. Figure \@ref(fig:fullmap) shows every employee car GPS stationary coordinates.
+
+```{r fullmap, fig.align = 'center', layout="l-page", fig.cap = 'Stationary GPS points of all cars',fig.height=8}
+gps_stop_points <- gps_pts %>%
+  mutate(time.stop = difftime(next.start.time, end.time,units=c("mins")), 
+         time.stop = as.numeric(time.stop),
+         time.location = difftime(next.start.time,end.time),
+         time.location = as.numeric(time.location),
+         name=paste(LastName,FirstName),
+         id=as.character(id),id=as.numeric(id),
+         gps.coord=end.gps)%>% 
+  filter(id<100 ) %>%
+  dplyr::select(name, CurrentEmploymentType,CurrentEmploymentTitle,end.time, end.gps,next.start.time,time.location) %>% 
+  rename(Arrival.Time=end.time, Coordinate=end.gps,Next_move_off_time=next.start.time,Time_at_location=time.location)
+
+## Plot interactive map
+tmap_mode("view")
+fullmap<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_stop_points)+
+  tm_markers()
+
+tmap_leaflet(fullmap)
+```
+
+1. Hovering around the location in between Arkadiou Park and Sannan Park with coordinates (24.89, 36.06) reveals 57 GPS stationary coordinates at that location. The 57 GPS points belongs to Dedos Lidelse, Osvaldo Hennie and Frente Birgitta cars. From the GPS timestamp in table 11, Dedos Lidelse car stops at the location overnight daily. We can deduce that the location is likely the home of Dedos Lidelse. Hence, the alluvial diagram in figure \@ref(fig:parallelset) was used to visualise the time spent at Dedos Lidelse house for the three employees. We can observe some trends based on the time spent at the location.
+
+```{r,layout="l-body-outset"}
+knitr::kable(gps_stop_points %>% st_drop_geometry() %>% 
+               filter(name=="Dedos Lidelse", Time_at_location>450) %>% 
+               select(name, Arrival.Time, Coordinate, 
+                      Next_move_off_time, Time_at_location),
+             "simple",
+             caption="Table of transaction at Chostus Hotel")
+```
+
+1.1 Frente Birgitta and Osvaldo Hennie often arrive at the location around 1700 hrs and leave at 1900 hrs on weekdays only.
+
+1.2 Frente Birgitta would often drop by the location twice a days. On those days, Frente Birgitta would arrive around 1700hrs and leave at 1900hrs, similar like above and return subsequently to the location after 2000hrs and leave the following morning.
+
+1.3 Osvaldo Hennie only stay overnight at that location 5 times over this period.
+
+Probable deduction is that they were having dinner together at Dedos Lidelse house. An unofficial relationship might exist between Frente Birgitta and Dedos Lidelse. Furthermore, both employees are from the engineering department which might further support the deduction.
+
+```{r parallelset, fig.align = 'center',layout='l-page', fig.cap = 'Alluvial Diagram of time spent at Dedos Lidelse house', fig.height=6}
+denos_loc<-st_set_crs(st_sfc(st_point(c(24.89612,36.06343))),4326)
+denos_home<-gps_stop_points %>% 
+  mutate(dist_denos = st_distance(Coordinate, denos_loc),
+         dist_denos=as.numeric(dist_denos)) %>% 
+  filter(dist_denos<50) %>% 
+  mutate(arrival.date=lubridate::date(Arrival.Time),
+         arrival.hour=lubridate::hour(Arrival.Time),
+         departure.date=lubridate::date(Next_move_off_time),
+         departure.hour=lubridate::hour(Next_move_off_time),
+         name2=name) %>% 
+  filter(arrival.hour>16) %>% 
+  select(name2, name,arrival.date, departure.date,arrival.hour,departure.hour)%>% 
+  st_drop_geometry() %>% to_lodes_form(denos_home, key="Variables",axes=2:6)
+
+ggplot(denos_home, aes(x=Variables,stratum=stratum,alluvium=alluvium))+
+  geom_alluvium(aes(fill=name2),discern=FALSE)+
+  geom_stratum(width=1/3,alpha=.2,discern=FALSE)+
+  geom_label(stat="stratum",size=2,aes(label=after_stat(stratum)))+
+  theme(axis.text.y=element_blank(),
+        axis.title.x=element_blank(),
+        axis.ticks.y=element_blank(),
+        axis.text.x = element_text(size=8),
+        legend.position="none")+
+  labs(fill="Name")
+```
+
+**5. Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why.**
+
+Employees car GPS were analysed to investigate for unusual driving patterns. The GPS data was manipulated to derive the two stationary coordinates for each car trip to determine the start and end coordinates. The distance between the two coordinates was tabulated to determine the displacement between the two coordinates. 
+
+Figure \@ref(fig:speedplot1) shows the scatter plot of the cars plotted with distance traveled against driving time with the line of best fit to show the average speed. The plots was split by time period and only showcase weekday data. The points in red are the outliers in each time period in the 1% quantile range. Although the distance is not the actual distance traveled by the car, it will be a good proxy to determine the average speed require to get from one location to another location.
+
+```{r speedplot1, fig.align = 'center',layout='l-body-outset', fig.cap = 'Scatter plot of car driving time against distance travelled on weekday',fig.height=6}
+gps_dist <- gps_pts %>% 
+  mutate(distance=st_distance(start.gps, end.gps, by_element = TRUE),
+         distance=as.numeric(distance), driving.time=as.numeric(driving.time),
+         id=as.character(id), id=as.numeric(id),
+         car.type=ifelse(id<100,"Car","Truck"),
+         speed=round((distance/1000)/(driving.time/60),2), dist=round(distance,2),
+         time_bin = case_when(
+                hour(start.time)>=0 & hour(start.time)<6 ~ "Midnight",
+                hour(start.time)>=6 & hour(start.time)<12 ~ "Morning",
+                hour(start.time)>=12 & hour(start.time) <18 ~ "Afternoon",
+                hour(start.time)>=18 ~ "Night"),
+          time_bin = factor(time_bin, 
+                     levels = c("Midnight", "Morning", "Afternoon", "Night")))
+speed_0.01<- gps_dist %>% group_by(id,date) %>% summarize(d=sum(dist), dt = sum(driving.time),n=n(),
+                                                          avg_dist = d/n, avg_time=dt/n) %>% ungroup()
+gps_dist_weekday<-gps_dist %>% 
+  filter(!(date %in% c(dmy(11012014),dmy(12012014),dmy(18012014),dmy(19012014)))&
+           id<100) %>% 
+  st_drop_geometry() %>% group_by(time_bin) %>% 
+  mutate(q=quantile(speed, 0.01),
+         col=as.character(ifelse(speed<q,1,0))) %>% 
+  ungroup()
+speed<-ggplot(gps_dist_weekday, aes(y=dist, x=driving.time))+
+  geom_point(aes(text=paste("</br>Name:",paste(LastName,FirstName),
+                 "</br>Distance:",dist,"metre",
+                 "</br>Minutes:",driving.time,
+                 "</br>Speed:",speed,"km/hr",
+                 "</br>Date:",date,
+                 "</br>Start time:",start.time,
+                 "</br>End time:",end.time),
+             color=col)) +
+  scale_color_manual(values=c("black","red"))+
+  geom_smooth(method="lm") + 
+  scale_x_continuous(name="Driving Time (minutes)",limits=c(0,NA))+
+  scale_y_continuous(name="Distance (metre)",limits=c(0,NA))+
+  theme(legend.position="none")+
+  facet_grid(~time_bin)
+ggplotly(speed,tooltip="text")%>% layout(hoverlabel=list(bgcolor="white"))
+```
+
+1. From the plot, we observed that there are not many cars that traveled during midnight (0000 to 0600 hrs) and the average speed in the morning was significantly slower compared to the afternoon or night based on the gradient of the trend line.
+2. In the subplot for the Afternoon, Mies Minke took 12 minutes to travel 0.4 metres. The extreme outlier from the trend line might suggest unusual driving pattern for investigation. Coupled with the suspicious cc transaction from earlier section, Mine Minke has several suspicious points throughout the investigation process.
+3. Among the 24 outliers, 5 outliers belonged to Mies Minke, 3 outliers from Campo-Corrente	Ada and 2 outliers from Resumir Felix and Vasco-Pais Willem. The remaining outliers each belonged to different indivduals. From the break down in table 12, we observe that they are mainly from the Executive team or the security team.
+
+```{r}
+knitr::kable(gps_dist_weekday %>%
+               filter(col==1) %>% 
+               group_by(id,LastName,FirstName,CurrentEmploymentType) %>% 
+               summarize(n=n()) %>% 
+               filter(n>1) %>% 
+               arrange(desc(n)), "simple",
+               caption="Table of unusual vehicle movement")
+
+```
+
+Figure \@ref(fig:map24) shows the map with GPS lines of Mies Minke and the car stationary coordinates are the blue dots throughout the 14 days. The stationary GPS coordinates of the other employees car were also added as markers on the map.
+From the map visualisation, we observe that Mies Minke car stop at some unusual location, which were neither his house nor point of interests locations.
+
+1.1 Mies Minke car stopped on the South East of Abila Map near the text: *To Port of Abila* in the tourist map on 07/01/2014 from 1113 to 1231 hours. Apart from Mies Minke, only Osvaldo Hennie, Ferro Inga, Bodrogi Loreto ever visited the location.
+
+1.2 Mies Minke car stopped somewhere south west of *Bean There Done That* on 08/01/2014 from 1132 to 1209 hours. Apart from Mies Minke car, only Osvaldo Hennie, Bodrogi Loreto and Ferro Inga car ever visited the location. Bodrogi Loreto car also visited on the same day, 08/01/2014 from 1129 to 1140 hours. The other car GPS reveals that the location was visited on 09/01/2014 and 17/01/2014.
+
+1.3 Mies Minke car stopped near Pilau Street twice, on 10/01/2014 and 16/01/2014. Apart from Mies Minke, only Bodrogi Loreto, Ferro Inga and Osvaldo Hennie car stop at that particular location and Osvaldo Hennie car stop at the location on the same day, 16/01/2014 from 1122 to 1210 hours, which overlapped with Mies Minke car. 
+
+1.4 Mies Minke car stopped in the north between *Coffee Chameleon* and *Guy's Gyros* on 09/01/2014 and 14/01/2014. Apart from Mies Minke, only Ferro Inga, Bodrogi Loreto and Osvaldo Hennie car visited the location from 13/01/2014 to 15/01/2014. 
+
+1.5 All four locations had the same group of 4 employees car stopping at those locations. Those locations were neither point of interests nor popular locations that other employees would visit. Furthermore, all four employees belongs to Security department and meeting at such unusual locations during weekday lunch time might suggest possible suspicious activity among them. 
+
+2.1 Mies Minke car stopped once at SVP/COO Strum Orhan house on 08/01/2014 from 2306 to 09/01/2014 0330 hours. The time period of Mies Minke car at the location is highly suspicious. Furthermore, Bodrogi Loreto car arrives at 0332 hours on 09/01/2014 and left the location at 0723 hrs in the morning.
+
+2.2. Mies Minke car stopped once at SVP/CFO Barranco Ingrid house on the 14/01/2014 from 0331 to 0747 hours. Similarly, Osvaldo Hennie car also stopped at the location earlier from 13/01/2014 from 2308 to 14/01/2014 0330 hrs. 
+
+2.3 The group of Security employees that took turn to be at either Executive houses were the same group of suspicious personnel in part 1 of our observation. 
+
+3.1 In the earlier sections, we deduce that Mies Minke (car id 24) credit card number is 4434. However, his car GPS data supports the fact that he used credit card number 9951 to perform transactions on 13/01/2014, including the high outlier transaction amount of 10,000 dollars at *Frydos Autosupply n’ More*.
+
+The four employees in particular Mies Minke are highly suspicious because of their unusual car GPS movement throughout the two weeks data.
+
+```{r map24, fig.align = 'center', layout='l-page', fig.cap = 'GPS data for Mies Minke',fig.height=8}
+gps_path_24 <- gps_sf %>% group_by(id) %>%
+  summarize(m = mean(timestamp), do_union=FALSE) %>% filter(id==24)%>% 
+  st_cast("LINESTRING") 
+stop_id24<-gps_stop_points %>% filter(name=="Mies Minke")
+
+tmap_mode("view")
+map24<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_path_24)+
+  tm_lines()+ 
+  tm_shape(gps_stop_points)+
+  tm_markers() +
+  tm_shape(stop_id24)+
+  tm_dots(col="blue",size=0.1)
+tmap_leaflet(map24)
+```
+
+From the map in figure \@ref(fig:map24), we discovered only five cars ever visited Kronos Capitol. From table 13. we can observe that 4 out of the 5 visits occurred on 18/01/2014 and 3 cars were from the Security department with only Herrero Kanon was from the Engineering department. Furthermore, Herrero Kanon car was stationary at that location from 18/01/2014 12:47:34 till 19/01/2014 12:38:01 where it drove off. The car being stationary at Kronos Capitol overnight was quite suspicious considering that the date was near the disappearance period. A possible deduction could it that Herrero Kanon took either of the 3 other Security cars and left Kronos Capitol before returning the next day to retrieve his vehicle. Another probable deduction could be Herrero Kanon was engaged in some activities during that period inside Kronos Capitol.
+
+```{r,fig.align = 'center', layout='l-page'}
+capitol<-st_set_crs(st_sfc(st_point(c(24.84936527, 36.05293538))),4326)
+gps_capitol <- gps_stop_points %>% 
+  mutate(diff=st_distance(gps.coord,capitol),
+         diff=as.numeric(diff)) %>% 
+  filter(diff<50) %>% 
+  st_drop_geometry() %>% 
+  select(name, CurrentEmploymentType,CurrentEmploymentTitle,Arrival.Time,
+         Next_move_off_time, Time_at_location)
+knitr::kable(gps_capitol,"simple",captio="Car stop at Kronos Capitol")
+```
+ 
+In conclusion, the employees in the Security department are very suspicious based on the GPS and credit card transactions data presented. We would recommend to perform further investigation on them to determine if they were linked to the dispparance in Abila town. 
