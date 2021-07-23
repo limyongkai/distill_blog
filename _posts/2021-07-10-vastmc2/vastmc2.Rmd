@@ -931,3 +931,100 @@ final_tagging <- final_tagging %>% ungroup() %>%
 
 The tagging of all 35 car owners (excluding truck drivers) have been completed and verified. 
 
+**4. Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships.**
+
+To visusalise potential relationships relationships, network analysis was used to look at the relationships. Figure \@ref(fig:network1) shows an interactive network analysis of each car ID employee and the locations that they made transactions at with their GAStech cc. From the network analysis throughout the two weeks of data, we can uncover some relationships among employees.
+
+```{r network1, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE, layout="l-body-outset", fig.align = 'center', fig.height=6, fig.cap = 'Network analysis by location and employee'}
+cc_data <- cc %>% mutate(day=lubridate::day(datetime), hour=lubridate::hour(datetime))
+sources <- cc_data %>% mutate(hour=lubridate::hour(datetime)) %>% 
+  distinct(last4ccnum) %>% left_join(final_tagging, by=c("last4ccnum")) %>% 
+  mutate(name=paste(LastName,FirstName)) %>% 
+  rename(label = name) %>% drop_na(id) %>%
+  mutate(CurrentEmploymentType=ifelse(is.na(CurrentEmploymentType),"Driver",CurrentEmploymentType))
+destinations <- cc_data  %>% 
+  distinct(location) %>%
+  rename(label = location)
+cc_nodes <- full_join(sources, 
+                      destinations, 
+                      by = "label") %>% rename(car_id=id)
+cc_nodes <- cc_nodes %>% 
+  rowid_to_column("id") %>%
+  mutate(CurrentEmploymentType=ifelse(is.na(CurrentEmploymentType),
+                                      "Locations",CurrentEmploymentType),
+         title=label) %>% 
+  rename(group=CurrentEmploymentType)
+edges <- cc_data %>% 
+  mutate(last4ccnum = as.character(last4ccnum)) %>%  
+  filter(last4ccnum %in% final_tagging$last4ccnum) %>% 
+  group_by(last4ccnum, location, day, hour) %>%
+  summarise(weight = n()) %>% 
+  ungroup()
+cc_edges <- edges %>% 
+  inner_join(cc_nodes,by = c("last4ccnum")) %>% 
+  rename(from = id)
+cc_edges <- cc_edges %>% 
+  inner_join(cc_nodes,by = c("location" = "label")) %>% 
+  rename(to = id) %>% 
+  dplyr::select(from, to,day, hour, weight) %>% 
+  mutate(time_bin = case_when(hour>=0&hour<6~"Midnight",
+                              hour>=6&hour<12~"Morning",
+                              hour>=12&hour<18~"Afternoon",
+                              hour>=18~"Night"),
+         weekday.weekend = ifelse(day %in% c(11,12,18,19),"Weekend","Weekday"),
+         day.week = case_when(day==6|day==13~"Monday",
+                              day==7|day==14~"Tuesday",
+                              day==8|day==15~"Wednesday",
+                              day==9|day==16~"Thursday",
+                              day==10|day==17~"Friday",
+                              day==11|day==18~"Saturday",
+                              day==12|day==19~"Sunday",))
+
+visNetwork(cc_nodes, cc_edges, main="Network analysis by location and employee") %>% 
+  visIgraphLayout(layout = "layout_on_grid") %>% 
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>% 
+  visLegend()
+```
+
+1. *Desafio Golf Course* was visited by GAStech Executives only. Based on figure \@ref(fig:boxplot1), we observed that there are only cc transactions made on Sunday at the location. Hence, we can infer that all five executive of GAStech might have some after working hours relationship by gathering at the *Desafio Golf Course* on both Sundays. They might be playing golf or a regular gathering at the location.
+2. *Chostus Hotel* was visited by Orilla Elsa, Tempestad Brand and Sanjorge Jr.	Sten throughout the 2 weeks of data. Table 9 below shows the transaction at Chostus Hotel only and we can observe that Orilla Elsa and Tempestad Brand made transactions on 4 separate dates during lunch. The transactions were relatively expensive for a lunch meal in comparison to other food and beverage location in Abila. Alternatively, they might have paid for a hotel room during their visit to the location. Furthermore, both of them are from the same department with the same title in GAStech and there might be some relationship between them.
+
+```{r, echo=TRUE, eval=TRUE,layout="l-body-outset"}
+knitr::kable(cc %>% mutate(last4ccnum=as.character(last4ccnum)) %>% 
+               left_join(final_tagging, by=c("last4ccnum")) %>% 
+               filter(location=="Chostus Hotel") %>% 
+               select(name, CurrentEmploymentType, CurrentEmploymentTitle,
+                      location, timestamp, price),
+             caption="Table of transaction at Chostus Hotel")
+```
+
+3. *Bean There Done That* location had only transactions made by the engineering department (yellow nodes in figure \@ref(fig:network1)). *Bean There Done That* is the furthest location from GAStech but a certain group of customer still visits and purchase from them. Visualising the GPS stationary data for the 7 customers from the engineering team in figure \@ref(fig:map-bean), we observe that 5 out of 7 of the customers resides in the area of Carnero Street and Parla Park whereas the remaining 2 customers, Frente Birgitta and Dedos Lidelse resides between Arkadiou Park and Sannan Park. The 2 customers residential location are at the same coordinates yet far away from *Bean There Done That*. However, they still patronise and purchase from there might signify some relationship between both of them.
+
+```{r map-bean, fig.align = 'center', layout="l-page", fig.cap = 'Stationary GPS points of Bean There Done That customers',fig.height=8}
+bean_cust <- final_tagging %>% filter(name == "Frente Birgitta"|
+                                      name == "Calzas Axel"|
+                                      name == "Frente Vira"|
+                                      name == "Azada Lars"|
+                                      name == "Balas Felix"|
+                                      name == "Dedos Lidelse"|
+                                      name == "Cazar Gustav")
+gps_stop_points_bean <- gps_pts %>%
+  filter(id %in% bean_cust$id) %>% 
+  mutate(time.stop = difftime(next.start.time, end.time,units=c("mins")), 
+         time.stop = as.numeric(time.stop),
+         name=paste(LastName,FirstName))%>% 
+  filter(time.stop < 300 ) %>% 
+  dplyr::select(id, start.time, start.gps,name) %>% 
+  mutate(id=as.character(id))
+
+## Plot interactive map
+tmap_mode("view")
+map_bean<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_stop_points_bean)+
+  tm_dots(col="name",palette="Dark2",id="start.time")
+
+tmap_leaflet(map_bean)
+```
+
