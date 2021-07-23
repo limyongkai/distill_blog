@@ -1,0 +1,115 @@
+---
+title: "Assignment: VAST Mini-Challenge 2"
+description: |
+  Part 1 out of 3
+author:
+  - name: Yong Kai Lim
+    url: https://limyongkai.netlify.app/
+    affiliation: Singapore Management University
+date: 07-23-2021
+output:
+  distill::distill_article:
+    self_contained: false
+    theme: lumen
+    font-size: 48px 
+font-family: sans serif
+mainfont: \usepackage[T1]{fontenc}
+preview: vast.jpg
+bibliography: references.bib
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, error=FALSE)
+```
+
+# 1. Overview
+In the roughly twenty years that Tethys-based GAStech has been operating a natural gas production site in the island country of Kronos, it has produced remarkable profits and developed strong relationships with the government of Kronos. However, GAStech has not been as successful in demonstrating environmental stewardship.
+
+In January, 2014, the leaders of GAStech are celebrating their new-found fortune as a result of the initial public offering of their very successful company. In the midst of this celebration, several employees of GAStech go missing. An organization known as the Protectors of Kronos (POK) is suspected in the disappearance, but things may not be what they seem.
+
+# 2. Objectives
+Both historical vehicle tracking data and transaction data from loyalty and credit card will be used to observe the following issues:
+
+1. The most popular locations and when they are popular
+2. Infer the owner of each credit card and loyalty card
+3. Identify potential informal or unofficial relationships among GASTech personnel
+4. Analyze suspicious activity of the missing personnel prior to the disappearance
+
+
+# 3. Data Sources
+The data source are available publicly on VAST Challenge 2021 website under the sub section [Mini-Challenge 2](https://vast-challenge.github.io/2021/MC2.html). The data used for the project are as follows:
+
+```{r eval=TRUE}
+library("tidyverse")
+library("readxl")
+emp_records <- read_excel("datasets/EmployeeRecords.xlsx")
+car <- read_csv("datasets/car-assignments.csv")
+cc <- read_csv("datasets/cc_data.csv")
+gps <- read_csv("datasets/gps.csv")
+loyalty <- read_csv("datasets/loyalty_data.csv")
+```
+* Geospatial maps of  Abila and Kronos Island
+
+```{r mc2, fig.align = 'center', fig.cap = 'Map of Abila, Kronos', echo=FALSE}
+knitr::include_graphics("datasets/MC2-tourist.jpg")
+```
+
+* `r nrow(emp_records)` employees details of GAStech
+
+```{r}
+knitr::kable(head(emp_records[,1:5]), "simple")
+```
+
+* `r nrow(car)` employees car assignments 
+
+```{r}
+knitr::kable(head(car[,1:5]), "simple")
+```
+
+* `r nrow(cc)` credit card transactions for `r n_distinct(cc$last4ccnum)` unique credit card numbers
+
+```{r}
+knitr::kable(head(cc[,1:4]), "simple")
+```
+
+* `r nrow(gps)` GPS log data from 6 Jan 2014 to 19 Jan 2014
+
+```{r}
+knitr::kable(head(gps[,1:4]), "simple")
+```
+
+* `r nrow(loyalty)` loyalty card transactions for `r n_distinct(loyalty$loyaltynum)` unique loyalty card numbers
+
+```{r}
+knitr::kable(head(loyalty[,1:4]), "simple")
+```
+
+# 4. Literature Review
+4.1 Past MITB Visual Analytics project were reviewed and evaluated prior to the assignment. 
+
+* In the assignment by [@ong2016] and [@guan2016], they utilised heatmap to plot frequency by timeseries. The heatmap used a color gradient to fill the boxes which showed the intensity and volume of the frequency and count over a time period. The visual overview allowed readers to easily determine patterns and trends over throughout a timeseries period. For example from [@ong2016] report, it revealed that there were more messages received over the weekend, especially on Sundays. From [@guan2016] report, it revealed that camping3 and camping6 has higher number of records than the other camps.
+  + However, static heatmap are not reader friendly enough to determine what was the count at specific time slots. As each heatmap box represents a discrete count by using a gradient color fill, it was difficult to accurately determine the specific count. Making the heatmap plot interactive would allow the details to be displayed at the tooltip when  hover across. This would allow the granularity data to be more well-presented in the report.
+
+4.2 The solutions submitted for VAST challenge 2014 were also reviewed on their repository webpage[@vastrepo]. 
+
+* Submission entry from the University of Buenos Aires - Tralice [@Buenos_Aires_Tralice] included a multi-layered horizontal bar graph that showed the GPS movement for each employment type. The background highlight to indicate the weekend provided a good contrast and representation for the differentiation between weekday and weekends. 
+
+* Submission entry from KU Leuven [@KU_Leuven] used a boxplot to visualise the credit card spending price at each location. Boxplot allows for distinct and clear visualisation of outliers in the transaction price. However, boxplot also provides informative details such as the median, 25 and 75 percentile price for each location which was not reflected in the boxplot. Furthermore, the 10,000 dollars outliers caused the y-axis tick marks to be large and each individual boxplot became too small on the plot.
+  +  Currently, as the spending price per transaction at each location are much lower in comparison to the tick marks, the features of the boxplot are not represented on the plot. Hence, the boxplot visualisation can be improved by performing logarithmic transformation for the y-axis to better represent the boxplot for prices at each location. It will also allow readers to see the outliers for each location too. 
+  + Interactive boxplot can be implemented to provide the micro-data such as median, 25 and 75 percentile prices using the tooltip when users hover over the points. This reduces cluttering of the plot while providing micro-data to the readers.
+  
+* Submission entry from the University of Calgary [@Uni_Calgary] utilised parallel coordinate plot to show the interaction and relationship between different categorical and numerical variables. The visualisation provides story telling insights between the different variables.
+
+* Most past submission includes the map overlayed with the GPS lines and points to show the movement of each car. I would like to highlight the submission from Central South University [@CSU] where the map utilise different colors for lines and dots to present their findings. The variation in colors allowed for better visualisation and clarity of the different parts to be highlighted to gain insights. However, due to the overlap of GPS data, an interactive map with tooltip will allow better interpretation of the findings.
+
+* Submission from Fraunhofer IAIS and City University London [@Fraunhofer] and RBEI-Bangalore [@RBEI] both used network cluster and analysis to investigate the relationships between GAStech employees. Fraunhofer IAIS university used an ego-centric graph together whereas RBEI used a combination of fragmented and node-only layout to visual the relationship by connecting each employees. The network analysis is an informative visualisation to provide an overview of potential relationships between employees or even connecting employees to different mediums such as the locations or emails.
+  + Although network analysis provides an overview of the relationships between nodes, usually the plot will be cluttered which make it difficult to drill down to specific or individual relationships. An alternative would be to make the plot interactive so that readers will be able to drill down on specific areas to investigate the relationships. 
+
+* Submission from University of Buenos Aires - Alcoser [@Buenos_Aires_Alcoser] used the sankey diagrams to visualise the locations where employees frequently visits. Sankey diagram shows how the quantities flow from one state to another and is usually used to show flows or processes. 
+  + Alluvial Plot is an alternative to Sankey Diagrams where it shows population of facts allocated across categorical dimensions. Depending on the visualisation and context, we can use either Sankey or Alluvial plot for visualisation.
+  
+* Submission from University of Bueons Aires - Croceri [@Buenos_Aires_Croceri] used a scatter plot to show the distance average speed against the speed for each employees route. The visualisation displayed extreme outliers effectively based on the car speed. 
+  + Interactive scatter plot split into different categories and different conditions might present more useful insights to infer possible deductions. Example by drilling down on certain departments or a specific time period etc.  
+
+
