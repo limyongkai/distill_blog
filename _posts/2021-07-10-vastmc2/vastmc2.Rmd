@@ -865,3 +865,69 @@ final_tagging <- final_tagging %>%
 Next, we will focus on car id 29 where it matches 90% of cc 3547 transactions and 100% of cc 5921. The high proportion of matches on both credit card warrants some investigation into the data. 
 
 Looking at table 7 for both cc number, we observe that cc 3547 has transactions between 12/01/2014 to 19/01/2014 and cc 5921 has transactions between 06/01/2014 to 10/01/2014. Cross-referencing the GPS data for car id 29 in Figure \@ref(fig:map7), we can observe that the cc transactions matches the GPS data of car id 29. A possible deduction is that the owner of car id 29 used both cc card as there was no overlap in the transaction dates for both cc. Possible scenario could be that the owner switch the CC from 5921 to 3547 after 10/01/2014. However, there might be missing data on 11/01/2014 where it was not captured on both cc. Hence, we will tag car id 29 to both cc 5921 and 3547.
+
+```{r map7, eval=TRUE, echo=TRUE, layout="l-body-outset", fig.height=8,fig.align = 'center', fig.cap = 'GPS for car id 29'}
+gps_path29 <- gps_sf %>% 
+  filter(id==29) %>% 
+  group_by(id) %>% 
+  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
+gps29_pt <- gps_stop_points1 %>% filter(id==29)
+tmap_mode("view")
+map7<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_path29)+
+  tm_lines() +
+  tm_shape(gps29_pt)+
+  tm_dots(col="blue")
+cc3547 <- cc %>% filter(last4ccnum==3547) %>% dplyr::select(-datetime, -date)
+cc5921 <- cc %>% filter(last4ccnum==5921) %>% dplyr::select(-datetime, -date)
+knitr::kable(list(cc3547,cc5921),caption="Transactions for CC 3547 & 5921")
+tmap_leaflet(map7)
+```
+
+Lastly, we will look at car id 30 with cc 6901 and 8202. The GPS data for car id 30 was visualise in Figure \@ref(fig:map8) and the transaction from cc 6901 and 8202 in table 8. 
+
+Comparing the GPS data map and cc translation data, we focused on locations with a lower frequency of visit and locations in a less congested area for easier verification. From the 3 locations and transaction details below, we can deduce that cc 6901 matches car id 30.
+
+1. GPS data showed a visit to *Ouzeri Elian* on 07/01/2014 and only cc 6901 has matching transaction. 
+2. GPS data showed visits to *Kalami Kafenion* on 15/01/2014 and 18/01/2014 and only cc 6901 has matching transaction for both days.
+3. GPS data showed visits to *Hippokampos* on 10/01/2014 and 14/01/2014 and only cc 6901 has matching transaction for both days.
+
+```{r map8, eval=TRUE, echo=TRUE, layout="l-page", fig.align = 'center', fig.cap = 'GPS for car id 30',fig.height=8}
+gps_path_30 <- gps_sf %>% 
+  filter(id==30) %>% 
+  group_by(id) %>%
+  summarize(m = mean(timestamp), do_union=FALSE) %>% st_cast("LINESTRING")
+gps_stop_points30 <- gps_pts %>%
+  mutate(time.stop = difftime(next.start.time, end.time, units=c("mins")), 
+         time.stop = as.numeric(time.stop))%>% 
+  filter(time.stop < 300 & id==30) %>% 
+  dplyr::select(id, start.time, start.gps)
+
+## Plot interactive map
+tmap_mode("view")
+map8<-tm_shape(bgmap) +
+  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
+         interpolate=TRUE, max.value=255) +
+  tm_shape(gps_path_30) +
+  tm_lines(col ="red") +
+  tm_shape(gps_stop_points30)+
+  tm_dots(col="blue", shape=30)
+tmap_leaflet(map8)
+```
+
+```{r table8, eval=TRUE, echo=TRUE, layout="l-page", fig.align = 'center', fig.cap = 'Transaction data for CC 6901 & 8202'}
+cc6901 <- cc %>% filter(last4ccnum==6901) %>% dplyr::select(-datetime, -date)
+cc8202 <- cc %>% filter(last4ccnum==8202) %>% dplyr::select(-datetime, -date)
+knitr::kable(list(cc6901,cc8202),caption="Transactions for CC 6901 & 8202")
+
+final_tagging <- final_tagging %>% ungroup() %>% 
+  filter(!(last4ccnum=="8202"& id=="30")) %>% 
+  mutate(id=as_factor(id)) %>% 
+  left_join(car, by=c("id"="CarID")) %>% 
+  mutate(name=paste(LastName,FirstName))
+```
+
+The tagging of all 35 car owners (excluding truck drivers) have been completed and verified. 
+
