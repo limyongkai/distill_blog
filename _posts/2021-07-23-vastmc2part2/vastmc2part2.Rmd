@@ -22,7 +22,10 @@ preview: vast.jpg
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, error=FALSE)
 ```
 
-# Tasks and Questions:
+# Continue Investigation from [Part 2](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part1/)....
+
+## Tasks and Questions:
+
 **1. Using just the credit and loyalty card data, identify the most popular locations, and when they are popular. What anomalies do you see? What corrections would you recommend to correct these anomalies?**
 
 The following packages are loaded for data preparation and visualisation.
@@ -496,4 +499,8 @@ map3<-tm_shape(bgmap) +
 tmap_leaflet(map3)
 ```
 
+To be continued with [Part 3](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part3/)....
 
+```{r, echo=FALSE}
+save(cc,gps,car,gps_stop,final_trans_1,gps_sf, file="part2data.RData")
+```
