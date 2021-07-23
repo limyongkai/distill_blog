@@ -16,8 +16,6 @@ font-family: sans serif
 mainfont: \usepackage[T1]{fontenc}
 preview: vast.jpg
 ---
-
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, error=FALSE)
 ```
@@ -42,7 +40,7 @@ bgmap <- raster("datasets/MC2-tourist.tif")
 load("part2data.RData")
 ```
 
-## Continue Investigation from [Part 2](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part2/)....
+### Continue Investigation from [Part 2](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part2/)....
 
 **3. Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
 
@@ -658,4 +656,4 @@ ggplot(denos_home, aes(x=Variables,stratum=stratum,alluvium=alluvium))+
   labs(fill="Name")
 ```
 
-## To be continued with [Part 4](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part4/)....
+### To be continued with [Part 4](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part4/)....

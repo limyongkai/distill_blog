@@ -43,7 +43,7 @@ bgmap <- raster("datasets/MC2-tourist.tif")
 load("part3data.RData")
 ```
 
-## Continue Investigation from [Part 3](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part3/)....
+### Continue Investigation from [Part 3](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part3/)....
 
 **4. Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships.**
 
