@@ -1,7 +1,7 @@
 ---
 title: "Assignment: VAST Mini-Challenge 2"
 description: |
-  Part 1 out of 3
+  Part 1 out of 4
 author:
   - name: Yong Kai Lim
     url: https://limyongkai.netlify.app/
@@ -112,4 +112,4 @@ knitr::kable(head(loyalty[,1:4]), "simple")
 * Submission from University of Bueons Aires - Croceri [@Buenos_Aires_Croceri] used a scatter plot to show the distance average speed against the speed for each employees route. The visualisation displayed extreme outliers effectively based on the car speed. 
   + Interactive scatter plot split into different categories and different conditions might present more useful insights to infer possible deductions. Example by drilling down on certain departments or a specific time period etc.  
 
-To be continued with [Part 2](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part2/)....
+## To be continued with [Part 2](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part2/)....

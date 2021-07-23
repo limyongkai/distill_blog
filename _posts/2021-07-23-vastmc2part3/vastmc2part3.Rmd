@@ -1,7 +1,7 @@
 ---
 title: "Assignment: VAST Mini-Challenge 2"
 description: |
-  Part 3 out of 3
+  Part 3 out of 4
 author:
   - name: Yong Kai Lim
     url: https://limyongkai.netlify.app/
@@ -42,7 +42,7 @@ bgmap <- raster("datasets/MC2-tourist.tif")
 load("part2data.RData")
 ```
 
-# Continue Investigation from [Part 2](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part2/)....
+## Continue Investigation from [Part 2](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part2/)....
 
 **3. Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
 
@@ -658,122 +658,4 @@ ggplot(denos_home, aes(x=Variables,stratum=stratum,alluvium=alluvium))+
   labs(fill="Name")
 ```
 
-**5. Do you see evidence of suspicious activity? Identify 1- 10 locations where you believe the suspicious activity is occurring, and why.**
-
-Employees car GPS were analysed to investigate for unusual driving patterns. The GPS data was manipulated to derive the two stationary coordinates for each car trip to determine the start and end coordinates. The distance between the two coordinates was tabulated to determine the displacement between the two coordinates. 
-
-Figure \@ref(fig:speedplot1) shows the scatter plot of the cars plotted with distance traveled against driving time with the line of best fit to show the average speed. The plots was split by time period and only showcase weekday data. The points in red are the outliers in each time period in the 1% quantile range. Although the distance is not the actual distance traveled by the car, it will be a good proxy to determine the average speed require to get from one location to another location.
-
-```{r speedplot1, fig.align = 'center',layout='l-body-outset', fig.cap = 'Scatter plot of car driving time against distance travelled on weekday',fig.height=6}
-gps_dist <- gps_pts %>% 
-  mutate(distance=st_distance(start.gps, end.gps, by_element = TRUE),
-         distance=as.numeric(distance), driving.time=as.numeric(driving.time),
-         id=as.character(id), id=as.numeric(id),
-         car.type=ifelse(id<100,"Car","Truck"),
-         speed=round((distance/1000)/(driving.time/60),2), dist=round(distance,2),
-         time_bin = case_when(
-                hour(start.time)>=0 & hour(start.time)<6 ~ "Midnight",
-                hour(start.time)>=6 & hour(start.time)<12 ~ "Morning",
-                hour(start.time)>=12 & hour(start.time) <18 ~ "Afternoon",
-                hour(start.time)>=18 ~ "Night"),
-          time_bin = factor(time_bin, 
-                     levels = c("Midnight", "Morning", "Afternoon", "Night")))
-speed_0.01<- gps_dist %>% group_by(id,date) %>% summarize(d=sum(dist), dt = sum(driving.time),n=n(),
-                                                          avg_dist = d/n, avg_time=dt/n) %>% ungroup()
-gps_dist_weekday<-gps_dist %>% 
-  filter(!(date %in% c(dmy(11012014),dmy(12012014),dmy(18012014),dmy(19012014)))&
-           id<100) %>% 
-  st_drop_geometry() %>% group_by(time_bin) %>% 
-  mutate(q=quantile(speed, 0.01),
-         col=as.character(ifelse(speed<q,1,0))) %>% 
-  ungroup()
-speed<-ggplot(gps_dist_weekday, aes(y=dist, x=driving.time))+
-  geom_point(aes(text=paste("</br>Name:",paste(LastName,FirstName),
-                 "</br>Distance:",dist,"metre",
-                 "</br>Minutes:",driving.time,
-                 "</br>Speed:",speed,"km/hr",
-                 "</br>Date:",date,
-                 "</br>Start time:",start.time,
-                 "</br>End time:",end.time),
-             color=col)) +
-  scale_color_manual(values=c("black","red"))+
-  geom_smooth(method="lm") + 
-  scale_x_continuous(name="Driving Time (minutes)",limits=c(0,NA))+
-  scale_y_continuous(name="Distance (metre)",limits=c(0,NA))+
-  theme(legend.position="none")+
-  facet_grid(~time_bin)
-ggplotly(speed,tooltip="text")%>% layout(hoverlabel=list(bgcolor="white"))
-```
-
-1. From the plot, we observed that there are not many cars that traveled during midnight (0000 to 0600 hrs) and the average speed in the morning was significantly slower compared to the afternoon or night based on the gradient of the trend line.
-2. In the subplot for the Afternoon, Mies Minke took 12 minutes to travel 0.4 metres. The extreme outlier from the trend line might suggest unusual driving pattern for investigation. Coupled with the suspicious cc transaction from earlier section, Mine Minke has several suspicious points throughout the investigation process.
-3. Among the 24 outliers, 5 outliers belonged to Mies Minke, 3 outliers from Campo-Corrente	Ada and 2 outliers from Resumir Felix and Vasco-Pais Willem. The remaining outliers each belonged to different indivduals. From the break down in table 12, we observe that they are mainly from the Executive team or the security team.
-
-```{r}
-knitr::kable(gps_dist_weekday %>%
-               filter(col==1) %>% 
-               group_by(id,LastName,FirstName,CurrentEmploymentType) %>% 
-               summarize(n=n()) %>% 
-               filter(n>1) %>% 
-               arrange(desc(n)), "simple",
-               caption="Table of unusual vehicle movement")
-
-```
-
-Figure \@ref(fig:map24) shows the map with GPS lines of Mies Minke and the car stationary coordinates are the blue dots throughout the 14 days. The stationary GPS coordinates of the other employees car were also added as markers on the map.
-From the map visualisation, we observe that Mies Minke car stop at some unusual location, which were neither his house nor point of interests locations.
-
-1.1 Mies Minke car stopped on the South East of Abila Map near the text: *To Port of Abila* in the tourist map on 07/01/2014 from 1113 to 1231 hours. Apart from Mies Minke, only Osvaldo Hennie, Ferro Inga, Bodrogi Loreto ever visited the location.
-
-1.2 Mies Minke car stopped somewhere south west of *Bean There Done That* on 08/01/2014 from 1132 to 1209 hours. Apart from Mies Minke car, only Osvaldo Hennie, Bodrogi Loreto and Ferro Inga car ever visited the location. Bodrogi Loreto car also visited on the same day, 08/01/2014 from 1129 to 1140 hours. The other car GPS reveals that the location was visited on 09/01/2014 and 17/01/2014.
-
-1.3 Mies Minke car stopped near Pilau Street twice, on 10/01/2014 and 16/01/2014. Apart from Mies Minke, only Bodrogi Loreto, Ferro Inga and Osvaldo Hennie car stop at that particular location and Osvaldo Hennie car stop at the location on the same day, 16/01/2014 from 1122 to 1210 hours, which overlapped with Mies Minke car. 
-
-1.4 Mies Minke car stopped in the north between *Coffee Chameleon* and *Guy's Gyros* on 09/01/2014 and 14/01/2014. Apart from Mies Minke, only Ferro Inga, Bodrogi Loreto and Osvaldo Hennie car visited the location from 13/01/2014 to 15/01/2014. 
-
-1.5 All four locations had the same group of 4 employees car stopping at those locations. Those locations were neither point of interests nor popular locations that other employees would visit. Furthermore, all four employees belongs to Security department and meeting at such unusual locations during weekday lunch time might suggest possible suspicious activity among them. 
-
-2.1 Mies Minke car stopped once at SVP/COO Strum Orhan house on 08/01/2014 from 2306 to 09/01/2014 0330 hours. The time period of Mies Minke car at the location is highly suspicious. Furthermore, Bodrogi Loreto car arrives at 0332 hours on 09/01/2014 and left the location at 0723 hrs in the morning.
-
-2.2. Mies Minke car stopped once at SVP/CFO Barranco Ingrid house on the 14/01/2014 from 0331 to 0747 hours. Similarly, Osvaldo Hennie car also stopped at the location earlier from 13/01/2014 from 2308 to 14/01/2014 0330 hrs. 
-
-2.3 The group of Security employees that took turn to be at either Executive houses were the same group of suspicious personnel in part 1 of our observation. 
-
-3.1 In the earlier sections, we deduce that Mies Minke (car id 24) credit card number is 4434. However, his car GPS data supports the fact that he used credit card number 9951 to perform transactions on 13/01/2014, including the high outlier transaction amount of 10,000 dollars at *Frydos Autosupply n’ More*.
-
-The four employees in particular Mies Minke are highly suspicious because of their unusual car GPS movement throughout the two weeks data.
-
-```{r map24, fig.align = 'center', layout='l-page', fig.cap = 'GPS data for Mies Minke',fig.height=8}
-gps_path_24 <- gps_sf %>% group_by(id) %>%
-  summarize(m = mean(timestamp), do_union=FALSE) %>% filter(id==24)%>% 
-  st_cast("LINESTRING") 
-stop_id24<-gps_stop_points %>% filter(name=="Mies Minke")
-
-tmap_mode("view")
-map24<-tm_shape(bgmap) +
-  tm_rgb(bgmap, r=1, g=2, b=3, alpha=NA, saturation=1, 
-         interpolate=TRUE, max.value=255) +
-  tm_shape(gps_path_24)+
-  tm_lines()+ 
-  tm_shape(gps_stop_points)+
-  tm_markers() +
-  tm_shape(stop_id24)+
-  tm_dots(col="blue",size=0.1)
-tmap_leaflet(map24)
-```
-
-From the map in figure \@ref(fig:map24), we discovered only five cars ever visited Kronos Capitol. From table 13. we can observe that 4 out of the 5 visits occurred on 18/01/2014 and 3 cars were from the Security department with only Herrero Kanon was from the Engineering department. Furthermore, Herrero Kanon car was stationary at that location from 18/01/2014 12:47:34 till 19/01/2014 12:38:01 where it drove off. The car being stationary at Kronos Capitol overnight was quite suspicious considering that the date was near the disappearance period. A possible deduction could it that Herrero Kanon took either of the 3 other Security cars and left Kronos Capitol before returning the next day to retrieve his vehicle. Another probable deduction could be Herrero Kanon was engaged in some activities during that period inside Kronos Capitol.
-
-```{r,fig.align = 'center', layout='l-page'}
-capitol<-st_set_crs(st_sfc(st_point(c(24.84936527, 36.05293538))),4326)
-gps_capitol <- gps_stop_points %>% 
-  mutate(diff=st_distance(geometry,capitol),
-         diff=as.numeric(diff)) %>% 
-  filter(diff<50) %>% 
-  st_drop_geometry() %>% 
-  select(name, CurrentEmploymentType,CurrentEmploymentTitle,Arrival.Time,
-         Next_move_off_time, Time_at_location)
-knitr::kable(gps_capitol,"simple",captio="Car stop at Kronos Capitol")
-```
- 
-In conclusion, the employees in the Security department are very suspicious based on the GPS and credit card transactions data presented. We would recommend to perform further investigation on them to determine if they were linked to the dispparance in Abila town. 
+## To be continued with [Part 4](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part4/)....
