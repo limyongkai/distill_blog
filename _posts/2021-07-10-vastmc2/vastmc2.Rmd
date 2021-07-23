@@ -1028,3 +1028,96 @@ map_bean<-tm_shape(bgmap) +
 tmap_leaflet(map_bean)
 ```
 
+To investigate non-official relationships, we will focus on after working hours transactions. The network analysis was drilled down to transactions performed on Weekday Nights only and dining locations that had transactions in the afternoon or night to reduce cluttering of the network analysis. Figure \@ref(fig:network2) shows the network analysis for weekday nights transactions only. The edge line connecting the employees to location are colored by day to visualize if any group of employees visited a particular location on the same day in the night.
+
+```{r network2, eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE, layout="l-body-outset", fig.align = 'center', fig.cap = 'Network analysis on Weekday Night',fig.height=6}
+sources <- cc_data %>% mutate(hour=lubridate::hour(datetime)) %>% 
+  distinct(last4ccnum) %>% left_join(final_tagging, by=c("last4ccnum")) %>% 
+  mutate(name=paste(LastName,FirstName)) %>% 
+  rename(label = name) %>% drop_na(id) %>% 
+  mutate(CurrentEmploymentType=ifelse(is.na(CurrentEmploymentType),
+                                      "Driver",CurrentEmploymentType))
+destinations <- cc_data  %>% 
+  filter(location =="Ouzeri Elian"|
+         location=="Guy's Gyros"|
+         location=="Katerina's Cafe"|
+         location=="Hippokampos"|
+         location=="Abila Zacharo"|
+         location=="Gelatogalore"|
+         location=="Kalami Kafenion"|
+         location=="Chostus Hotel") %>% 
+  distinct(location) %>%
+  rename(label = location)
+cc_nodes <- full_join(sources, 
+                      destinations, 
+                      by = "label") %>% rename(car_id=id)
+cc_nodes <- cc_nodes %>% 
+  rowid_to_column("id") %>%
+  mutate(CurrentEmploymentType=ifelse(is.na(CurrentEmploymentType),
+                                      "Locations",CurrentEmploymentType),
+         title=label) %>% 
+  rename(group=CurrentEmploymentType)
+edges <- cc_data %>% 
+  mutate(last4ccnum = as.character(last4ccnum)) %>%  
+  filter(last4ccnum %in% final_tagging$last4ccnum) %>% 
+  group_by(last4ccnum, location, day, hour) %>%
+  summarise(weight = n()) %>% 
+  ungroup()
+cc_edges <- edges %>% 
+  inner_join(cc_nodes,by = c("last4ccnum")) %>% 
+  rename(from = id)
+cc_edges <- cc_edges %>% 
+  inner_join(cc_nodes,by = c("location" = "label")) %>% 
+  rename(to = id) %>% 
+  dplyr::select(from, to,day, hour, weight) %>% 
+  mutate(time_bin = case_when(hour>=0&hour<6~"Midnight",
+                              hour>=6&hour<12~"Morning",
+                              hour>=12&hour<18~"Afternoon",
+                              hour>=18~"Night"),
+         weekday.weekend = ifelse(day %in% c(11,12,18,19),"Weekend","Weekday"),
+         day.week = case_when(day==6|day==13~"Monday",
+                              day==7|day==14~"Tuesday",
+                              day==8|day==15~"Wednesday",
+                              day==9|day==16~"Thursday",
+                              day==10|day==17~"Friday",
+                              day==11|day==18~"Saturday",
+                              day==12|day==19~"Sunday",))
+cc_edges_dn<- cc_edges %>% 
+  filter(time_bin=="Night", weekday.weekend=="Weekday") %>% 
+  mutate(color=rainbow(max(day))[day])
+# cc_edges_dn$color <- palette(rainbow(7))[cc_edges_dn$day]
+visNetwork(cc_nodes, cc_edges_dn, 
+           main="Network analysis by location and employee") %>% 
+  visIgraphLayout(layout = "layout_on_grid") %>% 
+  visOptions(highlightNearest = TRUE, nodesIdSelection = TRUE) %>%
+  visEdges(smooth=FALSE, color="color") %>% 
+  visLegend()
+```
+
+1. Employee Baza Isak and Calixto Nils patronised *Ouzeri Elian* on several night at the same time. From table 10, we observe that on 08/01 and 16/1, Baza Isak and Calixto Nils transaction timing were only 1 minute apart and on 17/1, both had transactions in the evening. A probable deduction could be that they are of good friends since they are in the same department who hang out and have dinner together after working hours. 
+
+```{r, echo=TRUE, eval=TRUE,layout="l-body-outset"}
+final_cc <- cc %>% mutate(left4ccnum=as.character(last4ccnum)) %>% 
+  left_join(final_tagging, by="last4ccnum") %>% 
+  mutate(day=lubridate::day(datetime), hour=lubridate::hour(datetime),
+         time_bin = case_when(hour>=0&hour<6~"Midnight",
+                              hour>=6&hour<12~"Morning",
+                              hour>=12&hour<18~"Afternoon",
+                              hour>=18~"Night"),
+         weekday.weekend = ifelse(day %in% c(11,12,18,19),"Weekend","Weekday"),
+         day.week = case_when(day==6|day==13~"Monday",
+                              day==7|day==14~"Tuesday",
+                              day==8|day==15~"Wednesday",
+                              day==9|day==16~"Thursday",
+                              day==10|day==17~"Friday",
+                              day==11|day==18~"Saturday",
+                              day==12|day==19~"Sunday",))
+knitr::kable(final_cc %>% 
+             filter(weekday.weekend=="Weekday"&time_bin=="Night") %>% 
+             filter(location =="Ouzeri Elian"&(name=="Baza Isak"|name=="Calixto Nils")) %>% 
+             select(location, datetime, name, price, CurrentEmploymentType,CurrentEmploymentTitle)
+               , "simple",
+      caption="Baza Isak and Calixto Nils transactions at Ouzeri Elian on Weekdays Nights")
+```
+
+Apart from the transactional data performed by employees, we will look into the GPS data to observe for any gathering and potential relationships. Figure \@ref(fig:fullmap) shows every employee car GPS stationary coordinates.
