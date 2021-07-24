@@ -43,7 +43,7 @@ bgmap <- raster("datasets/MC2-tourist.tif")
 load("part3data.RData")
 ```
 
-### Continue Investigation from [Part 3](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part3/)....
+### Continuing the Investigation from [Part 3](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part3/)....
 
 **4. Given the data sources provided, identify potential informal or unofficial relationships among GASTech personnel. Provide evidence for these relationships.**
 
@@ -100,8 +100,8 @@ visNetwork(cc_nodes, cc_edges, main="Network analysis by location and employee")
   visLegend()
 ```
 
-1. *Desafio Golf Course* was visited by GAStech Executives only. Based on figure \@ref(fig:boxplot1), we observed that there are only cc transactions made on Sunday at the location. Hence, we can infer that all five executive of GAStech might have some after working hours relationship by gathering at the *Desafio Golf Course* on both Sundays. They might be playing golf or a regular gathering at the location.
-2. *Chostus Hotel* was visited by Orilla Elsa, Tempestad Brand and Sanjorge Jr.	Sten throughout the 2 weeks of data. Table 9 below shows the transaction at Chostus Hotel only and we can observe that Orilla Elsa and Tempestad Brand made transactions on 4 separate dates during lunch. The transactions were relatively expensive for a lunch meal in comparison to other food and beverage location in Abila. Alternatively, they might have paid for a hotel room during their visit to the location. Furthermore, both of them are from the same department with the same title in GAStech and there might be some relationship between them.
+1. *Desafio Golf Course* was visited by GAStech Executives only. Based on the boxplot in part 2, we observed that there are only cc transactions made on Sunday at the location. Hence, we can infer that all five executive of GAStech might have some after working hours relationship by gathering at the *Desafio Golf Course* on both Sundays. They might be playing golf or a regular gathering at the location.
+2. *Chostus Hotel* was visited by Orilla Elsa, Tempestad Brand and Sanjorge Jr.	Sten throughout the 2 weeks of data. Table 1 below shows the transaction at Chostus Hotel only and we can observe that Orilla Elsa and Tempestad Brand made transactions on 4 separate dates during lunch. The transactions were relatively expensive for a lunch meal in comparison to other food and beverage location in Abila. Alternatively, they might have paid for a hotel room during their visit to the location. Furthermore, both of them are from the same department with the same title in GAStech and there might be some relationship between them.
 
 ```{r, echo=TRUE, eval=TRUE,layout="l-body-outset"}
 knitr::kable(cc %>% mutate(last4ccnum=as.character(last4ccnum)) %>% 
@@ -208,7 +208,7 @@ visNetwork(cc_nodes, cc_edges_dn,
   visLegend()
 ```
 
-1. Employee Baza Isak and Calixto Nils patronised *Ouzeri Elian* on several night at the same time. From table 10, we observe that on 08/01 and 16/1, Baza Isak and Calixto Nils transaction timing were only 1 minute apart and on 17/1, both had transactions in the evening. A probable deduction could be that they are of good friends since they are in the same department who hang out and have dinner together after working hours. 
+1. Employee Baza Isak and Calixto Nils patronised *Ouzeri Elian* on several night at the same time. From table 2, we observe that on 08/01 and 16/1, Baza Isak and Calixto Nils transaction timing were only 1 minute apart and on 17/1, both had transactions in the evening. A probable deduction could be that they are of good friends since they are in the same department who hang out and have dinner together after working hours. 
 
 ```{r, echo=TRUE, eval=TRUE,layout="l-body-outset"}
 final_cc <- cc %>% mutate(left4ccnum=as.character(last4ccnum)) %>% 
@@ -262,7 +262,7 @@ fullmap<-tm_shape(bgmap) +
 tmap_leaflet(fullmap)
 ```
 
-1. Hovering around the location in between Arkadiou Park and Sannan Park with coordinates (24.89, 36.06) reveals 57 GPS stationary coordinates at that location. The 57 GPS points belongs to Dedos Lidelse, Osvaldo Hennie and Frente Birgitta cars. From the GPS timestamp in table 11, Dedos Lidelse car stops at the location overnight daily. We can deduce that the location is likely the home of Dedos Lidelse. Hence, the alluvial diagram in figure \@ref(fig:parallelset) was used to visualise the time spent at Dedos Lidelse house for the three employees. We can observe some trends based on the time spent at the location.
+1. Hovering around the location in between Arkadiou Park and Sannan Park with coordinates (24.89, 36.06) reveals 57 GPS stationary coordinates at that location. The 57 GPS points belongs to Dedos Lidelse, Osvaldo Hennie and Frente Birgitta cars. From the GPS timestamp in table 3, Dedos Lidelse car stops at the location overnight daily. We can deduce that the location is likely the home of Dedos Lidelse. Alluvial diagram in figure \@ref(fig:parallelset) was used to visualise the time spent at Dedos Lidelse house for the three employees. We can observe some trends based on the time spent at the location.
 
 ```{r,layout="l-body-outset"}
 knitr::kable(gps_stop_points %>% st_drop_geometry() %>% 
@@ -357,7 +357,7 @@ ggplotly(speed,tooltip="text")%>% layout(hoverlabel=list(bgcolor="white"))
 
 1. From the plot, we observed that there are not many cars that traveled during midnight (0000 to 0600 hrs) and the average speed in the morning was significantly slower compared to the afternoon or night based on the gradient of the trend line.
 2. In the subplot for the Afternoon, Mies Minke took 12 minutes to travel 0.4 metres. The extreme outlier from the trend line might suggest unusual driving pattern for investigation. Coupled with the suspicious cc transaction from earlier section, Mine Minke has several suspicious points throughout the investigation process.
-3. Among the 24 outliers, 5 outliers belonged to Mies Minke, 3 outliers from Campo-Corrente	Ada and 2 outliers from Resumir Felix and Vasco-Pais Willem. The remaining outliers each belonged to different indivduals. From the break down in table 12, we observe that they are mainly from the Executive team or the security team.
+3. Among the 24 outliers, 5 outliers belonged to Mies Minke, 3 outliers from Campo-Corrente	Ada and 2 outliers from Resumir Felix and Vasco-Pais Willem. The remaining outliers each belonged to different indivduals. From the break down in table 4, we observe that they are mainly from the Executive team or the security team.
 
 ```{r}
 knitr::kable(gps_dist_weekday %>%
@@ -370,7 +370,7 @@ knitr::kable(gps_dist_weekday %>%
 
 ```
 
-Figure \@ref(fig:map24) shows the map with GPS lines of Mies Minke and the car stationary coordinates are the blue dots throughout the 14 days. The stationary GPS coordinates of the other employees car were also added as markers on the map.
+Figure \@ref(fig:map24) shows the map with GPS lines of Mies Minke and the car stationary GPS coordinates are represented by the blue dots. The stationary GPS coordinates of the other employees car were also added as markers on the map.
 From the map visualisation, we observe that Mies Minke car stop at some unusual location, which were neither his house nor point of interests locations.
 
 1.1 Mies Minke car stopped on the South East of Abila Map near the text: *To Port of Abila* in the tourist map on 07/01/2014 from 1113 to 1231 hours. Apart from Mies Minke, only Osvaldo Hennie, Ferro Inga, Bodrogi Loreto ever visited the location.
@@ -412,7 +412,7 @@ map24<-tm_shape(bgmap) +
 tmap_leaflet(map24)
 ```
 
-From the map in figure \@ref(fig:map24), we discovered only five cars ever visited Kronos Capitol. From table 13. we can observe that 4 out of the 5 visits occurred on 18/01/2014 and 3 cars were from the Security department with only Herrero Kanon was from the Engineering department. Furthermore, Herrero Kanon car was stationary at that location from 18/01/2014 12:47:34 till 19/01/2014 12:38:01 where it drove off. The car being stationary at Kronos Capitol overnight was quite suspicious considering that the date was near the disappearance period. A possible deduction could it that Herrero Kanon took either of the 3 other Security cars and left Kronos Capitol before returning the next day to retrieve his vehicle. Another probable deduction could be Herrero Kanon was engaged in some activities during that period inside Kronos Capitol.
+From the map in figure \@ref(fig:map24), we discovered only five cars ever visited Kronos Capitol. From table 5 we can observe that 4 out of the 5 visits occurred on 18/01/2014 and 3 cars were from the Security department with only Herrero Kanon was from the Engineering department. Furthermore, Herrero Kanon car was stationary at that location from 18/01/2014 12:47:34 till 19/01/2014 12:38:01 where it drove off. The car being stationary at Kronos Capitol overnight was quite suspicious considering that the date was near the disappearance period. A possible deduction could it that Herrero Kanon took either of the 3 other Security cars and left Kronos Capitol before returning the next day to retrieve his vehicle. Another probable deduction could be Herrero Kanon was engaged in some activities during that period inside Kronos Capitol.
 
 ```{r,fig.align = 'center', layout='l-page'}
 capitol<-st_set_crs(st_sfc(st_point(c(24.84936527, 36.05293538))),4326)

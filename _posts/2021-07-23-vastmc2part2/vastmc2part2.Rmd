@@ -22,7 +22,7 @@ preview: vast.jpg
 knitr::opts_chunk$set(echo = TRUE, message = FALSE, error=FALSE)
 ```
 
-### Continue Investigation from [Part 1](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part1/)....
+### Continuing the Investigation from [Part 1](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part1/)....
 
 # Tasks and Questions:
 
@@ -335,7 +335,7 @@ boxplot_p$x$data[[1]]$marker$outliercolor = "red"
 boxplot_p$x$data[[1]]$marker$color = "red"
 
 ## Plot Interactive Bar chart and Boxplot
-girafe(ggobj=freq_location, width_svg = 7, height_svg = 7)
+girafe(ggobj=freq_location, width_svg = 7, height_svg = 7)ya
 boxplot_p
 ```
  

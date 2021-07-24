@@ -40,9 +40,9 @@ bgmap <- raster("datasets/MC2-tourist.tif")
 load("part2data.RData")
 ```
 
-### Continue Investigation from [Part 2](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part2/)....
+### Continuing the Investigation from [Part 2](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part2/)....
 
-**3. Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data? Please limit your answer to 8 images and 500 words.**
+**3. Can you infer the owners of each credit card and loyalty card? What is your evidence? Where are there uncertainties in your method? Where are there uncertainties in the data?**
 
 In order to tag the owners of each credit card and loyalty card to the car id, we would need to combine several factors together to triangulate the results. The two conditions that will be used to triangulate the data between the three datasets are:
 
@@ -51,7 +51,7 @@ In order to tag the owners of each credit card and loyalty card to the car id, w
 
 The locations coordinates would be assigned by referencing the tourist map of Abila. However, from the earlier section, we discovered that the tourist map provided might not be accurate in locating the location coordinates as the icons on the tourist map might not represent the exact coordinates of the location.
 
-Furthermore, the tourist map do not have all the locations marked by its logo which will not allows a full join with the locations in the cc transaction data. Table 5 shows the locations from the cc dataset whose logo could not be located visually on the tourist map of Abila. Ranking the number of transaction at each location in descending order, there are high volume of transactions at those locations and the need to map their GPS coordinate is necessary. 
+Furthermore, the tourist map do not have all the locations marked by its logo, which will not allow a full join with the locations in the cc transaction data. Table 1 shows the locations from the cc dataset whose logo could not be located visually on the tourist map of Abila. Ranking the number of transaction at each location in descending order, there are high volumes of transactions at those locations and the coordinates are necessary to be mapped. 
 
 ```{r, echo=TRUE, eval=TRUE }
 ## Transactions on 13/01/2014 at "Frydos Autosupply n' More"
@@ -125,9 +125,9 @@ map_POI<-tm_shape(bgmap) +
 tmap_leaflet(map_POI)
 ```
 
-The car id are triangulated by tabulating the centroid coordinates of the GPS data from the stationary GPS stop locations from the map. However, there are few limitations by using the methodology mentioned earlier for tagging the owners. 
+The car id were triangulated by tabulating the centroid coordinates of the GPS data from the stationary GPS stop locations from the map. However, there are few limitations by using the methodology mentioned earlier for tagging the owners. 
 
-1. In the earlier section, 4 coffee shops were discovered whose cc transactions timestamp were all at 12:00 but the actual visit time by the employees were in the morning. The inaccuracy of the cc transactions timestamp made it impossible to tag them to the car GPS data.
+1. In the previous section, 4 coffee shops were discovered with cc transactions timestamp all at 12:00, but the actual visit time by the employees were in the morning. The inaccuracy of the cc transactions timestamp made it impossible to tag them to the car GPS data.
 2. In the earlier section, the distance between car id 24 GPS stationary coordinates at *Frydos Autosupply n' More* was 500 metres away. Locations might not have their dedicated carpark right next to them and some car owners are able to get on foot after parking at a nearby carpark.  Hence, the maximum distance of the car stop position to the location coordinates will be set at less than 500 metres, a reasonable distance for traveling on foot. 
 3. Employees might not drive their issued car out when they perform the transaction using their cc. Examples could be car pooling for a meal or using their personal vehicles when making the transactions. This will result in a incomplete tagging of the car id GPS to the transaction data.
 
@@ -245,7 +245,7 @@ ggplotly(histogram) %>% layout(hoverlabel=list(bgcolor="white"))
 
 Hence, we can confidently infer that matches over 75% will be accurate. However, as there are more cc owners (55 unique owners) than car owners (35 unique car id) and the truck drivers share vehicles (5 unique truck id), we will drop the truck drivers with car id of 100 and above. Observation of the heatmap in figure \@ref(fig:tagging) reveals that car id 23, car id 29 and car id 30 has matches of more than one cc number and car id 28 does not have a match with more than 75%. 
 
-From Table 6, we observe that car id 23 matches to three unique cc number with matches over 75%. The highest percentage match to cc 3484 at 91.43% shows high probability for inference, hence the observation that matches to cc 8202 and 8411 will be dropped.
+From Table 2, we observe that car id 23 matches to three unique cc number with matches over 75%. The highest percentage match to cc 3484 at 91.43% shows high probability for inference, hence the observation that matches to cc 8202 and 8411 will be dropped.
 
 For car id 29 and 30, the matches to cc number percentage are relatively high and defers less than 10%. Further investigation on the GPS map location will be performed to verify which match to retain. 
 
@@ -262,7 +262,7 @@ final_tagging <- tagging %>%
 
 Investigation of car id 28 low cc transactions matches was visualised in Figure \@ref(fig:map5) and it revealed that the GPS coordinates of car id 28 has lots of noise. The noise in the GPS line caused a wider spread of GPS line in the visualisation on the map and also zig-zag incoherent GPS path. This most probably signifies a faulty GPS signal on the car. 
 
-Secondly, we observe that the stop position was not accurate. For example, the frequency of GPS stop coordinates at the extreme south of the map should be at GAStech. Hence, the GPS stop coordinates seems to deviate in the North-West direction. The most probable explanation will be a faulty GPS system since the GPS points were noisy and were not correctly geo-referenced on the map.
+Secondly, we observe that the stop position was not accurate. For example, the frequency of GPS stop coordinates at the extreme south of the map should be at GAStech. Hence, the GPS stop coordinates seems to deviate in the North-West direction. The most probable explanation will be a faulty GPS system since the GPS points were noisy and not correctly geo-referenced on the map.
 
 ```{r map5, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8,fig.align = 'center', fig.cap = 'Original GPS for car id 28'}
 ## Map geometry for original car id 28 data
@@ -326,9 +326,9 @@ final_tagging <- final_tagging %>%
 
 Next, we will focus on car id 29 where it matches 90% of cc 3547 transactions and 100% of cc 5921. The high proportion of matches on both credit card warrants some investigation into the data. 
 
-Looking at table 7 for both cc number, we observe that cc 3547 has transactions between 12/01/2014 to 19/01/2014 and cc 5921 has transactions between 06/01/2014 to 10/01/2014. Cross-referencing the GPS data for car id 29 in Figure \@ref(fig:map7), we can observe that the cc transactions matches the GPS data of car id 29. A possible deduction is that the owner of car id 29 used both cc card as there was no overlap in the transaction dates for both cc. Possible scenario could be that the owner switch the CC from 5921 to 3547 after 10/01/2014. However, there might be missing data on 11/01/2014 where it was not captured on both cc. Hence, we will tag car id 29 to both cc 5921 and 3547.
+Looking at table 3 for both cc number, we observe that cc 3547 has transactions between 12/01/2014 to 19/01/2014 and cc 5921 has transactions between 06/01/2014 to 10/01/2014. Cross-referencing the GPS data for car id 29 in Figure \@ref(fig:map7), we can observe that the cc transactions matches the GPS data of car id 29. A possible deduction is that the owner of car id 29 used both cc card as there was no overlap in the transaction dates for both cc. Possible scenario could be that the owner switch the CC from 5921 to 3547 after 10/01/2014. However, there might be missing data on 11/01/2014 where it was not captured on both cc. Hence, we will tag car id 29 to both cc 5921 and 3547.
 
-```{r map7, eval=TRUE, echo=TRUE, layout="l-body-outset", fig.height=8,fig.align = 'center', fig.cap = 'GPS for car id 29'}
+```{r map7, eval=TRUE, echo=TRUE, layout="l-page", fig.height=8,fig.align = 'center', fig.cap = 'GPS for car id 29'}
 gps_path29 <- gps_sf %>% 
   filter(id==29) %>% 
   group_by(id) %>% 
@@ -348,7 +348,7 @@ knitr::kable(list(cc3547,cc5921),caption="Transactions for CC 3547 & 5921")
 tmap_leaflet(map7)
 ```
 
-Lastly, we will look at car id 30 with cc 6901 and 8202. The GPS data for car id 30 was visualise in Figure \@ref(fig:map8) and the transaction from cc 6901 and 8202 in table 8. 
+Lastly, we will look at car id 30 with cc 6901 and 8202. The GPS data for car id 30 was visualise in Figure \@ref(fig:map8) and the transaction from cc 6901 and 8202 in table 4. 
 
 Comparing the GPS data map and cc translation data, we focused on locations with a lower frequency of visit and locations in a less congested area for easier verification. From the 3 locations and transaction details below, we can deduce that cc 6901 matches car id 30.
 
