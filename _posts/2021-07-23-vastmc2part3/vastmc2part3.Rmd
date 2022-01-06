@@ -56,7 +56,7 @@ Furthermore, the tourist map do not have all the locations marked by its logo, w
 ```{r, echo=TRUE, eval=TRUE }
 ## Transactions on 13/01/2014 at "Frydos Autosupply n' More"
 locations <- data.frame(location = cc$location) %>% 
-  group_by(location) %>% summarize(number_transactions=n())
+  group_by(location) %>% summarise(number_transactions=n())
 knitr::kable(locations %>% 
       dplyr::filter(location == "Abila Zacharo" |
                     location == "Brewed Awakenings" |
@@ -219,14 +219,14 @@ gps_match <- final_trans_gps %>%
          diff.dist = as.numeric(diff.dist)) %>%
   filter(diff.dist <500)
 tagging <-gps_match %>%group_by(last4ccnum, id)%>%
-  summarize(tag=n()) %>% arrange(desc(tag))
+  summarise(tag=n()) %>% arrange(desc(tag))
 ## Get total count of transactions minus the 4 locations per cc num
 trans_collapse <- cc %>% mutate(last4ccnum=as_factor(last4ccnum)) %>% 
   filter(!(location %in% c("Bean There Done That",
                            "Brewed Awakenings",
                            "Coffee Shack",
                            "Jack's Magical Beans"))) %>%
-  group_by(last4ccnum) %>% summarize(total=n())
+  group_by(last4ccnum) %>% summarise(total=n())
 ## Limit to top 3 match only by percentage
 tagging_cc_gps <- left_join(tagging, trans_collapse, by=c("last4ccnum")) %>%
   mutate(percent=round(tag/total*100,2))
@@ -387,6 +387,7 @@ knitr::kable(list(cc6901,cc8202),caption="Transactions for CC 6901 & 8202")
 final_tagging <- final_tagging %>% ungroup() %>% 
   filter(!(last4ccnum=="8202"& id=="30")) %>% 
   mutate(id=as_factor(id)) %>% 
+  bind_rows(c(last4ccnum="5510", id="31")) %>% 
   left_join(car, by=c("id"="CarID")) %>% 
   mutate(name=paste(LastName,FirstName))
 ```
@@ -394,3 +395,6 @@ final_tagging <- final_tagging %>% ungroup() %>%
 The tagging of all 35 car owners (excluding truck drivers) have been completed and verified. 
 
 ### To be continued with [Part 4](https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part4/)....
+```{r}
+write_csv(final_tagging,"datasets/final_tagging.csv")
+```

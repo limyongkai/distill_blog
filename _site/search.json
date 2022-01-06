@@ -5,14 +5,14 @@
       "title": "About Yong Kai~",
       "author": [],
       "contents": "\r\nSome of the Software and skills I am learning~\r\n\r\nData manipulation and transformation using tidyverse\r\nVisualisation using ggplot and shiny application\r\nConfirmatory Data Analysis using statistical tests\r\nPredictive Analytics with Regression models\r\n\r\nData manipulation and transformation using numpy\r\nVisualisation using ggplot and seaborn\r\n\r\nJMP Pro, SAS\r\nExploratory and Confirmatory Data Analysis using statistical test\r\nClustering analysis with Hierarchical, K-means and latent class analysis algorthims\r\n\r\nSAS Enterprise Miner\r\nRegression and Recursive partitioning modeling\r\nTime series analysis (Dynamic Time Warping)\r\n\r\nVisusalisation using interactive dashboards\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-06-20T23:35:09+08:00"
+      "last_modified": "2021-08-10T23:50:00+08:00"
     },
     {
       "path": "index.html",
       "title": "Lim Yong Kai Blog",
       "author": [],
       "contents": "\r\n\r\nd-title, d-byline {\r\n  display: none\r\n}\r\n\r\n\r\nLim Yong Kai\r\nMaster of IT in Business Student at Singapore Management University\r\n  \r\n\r\nHello there!\r\nI am a student pursuing my Master of IT in Business at Singapore Management University. Graduating with a bachelor in Mechanical Engineering, I am embarking on a new journey into the Data Science industry. As an aspiring Data Scientist, I want to utilize my analytical acumen to find solutions and translate them into actionable insights using data.\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-07-15T22:16:50+08:00"
+      "last_modified": "2021-08-10T23:39:22+08:00"
     },
     {
       "path": "post.html",
@@ -20,7 +20,7 @@
       "description": "My Portfolio~. \n",
       "author": [],
       "contents": "\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-07-10T15:48:10+08:00"
+      "last_modified": "2021-07-24T17:32:38+08:00"
     }
   ],
   "collections": ["posts/posts.json"]

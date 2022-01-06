@@ -130,6 +130,7 @@ card_tag <- trans %>%
   filter(count_d > 1) %>%
   filter(!(last4ccnum == 1286 & loyaltynum =="L3288")) %>%
   dplyr::select(-(count_d))
+write.csv(card_tag,"card_tag.csv")
 ```
 
 The `r sum(is.na(trans$loyaltynum))` cc transactions that were not tagged were analysed by mapping the cc and loyalty card. Thereafter, a left join of non-tagged transactions to the loyalty data by field "date", "location" and loyaltynum" was performed. From Figure \@ref(fig:pcplot2), it was observed that most of the difference in cc card price and loyalty price converges to *"20"*, *"40"*, *"60"* and *"80"* dollars. A possible deduction based on the price difference in denomination of *"20"* could suggest some form of discount or rebate mentioned in the background. 
