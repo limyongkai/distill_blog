@@ -1,0 +1,30 @@
+---
+title: "JMP Discovery Summit 2021"
+description: |
+  My presentation on JMP Discovery Summit 2021!
+author:
+  - name: Yong Kai Lim
+    url: https://limyongkai.netlify.app/
+date: 09-01-2021
+output:
+  distill::distill_article:
+    self_contained: false
+    theme: lumen
+    font-size: 48px 
+font-family: sans serif
+mainfont: \usepackage[T1]{fontenc}
+preview: dsa-2021-im-presenting.jpg
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+Back in May 2021, I analysed China's Exchange Traded Fund (ETF) using unsupervised learning for my academic project. We compared two different clustering method, agglomerative hierarchical clustering and dynamic time warping clustering method to detect similarities of the price movements using JMP Pro from SAS and SAS Enterprise Miner software. 
+
+Thereafter, as recommended by our Professor, I submitted our paper to JMP Discovery Summit Americas 2021 and were shortlisted to present it for the event! I wasn't expecting for my paper to be shortlisted and it was definitely a pleasant surprise. Unfortunately, the conference was held online due to COVID-19 and there goes my opportunity to attend the event in the US physically. Nonetheless, it was still a memorable event that allowed me to share my work and to network with other professionals. My presentation was pre-recorded and can be viewed [here](https://community.jmp.com/t5/Discovery-Summit-Americas-2021/An-Analysis-of-ETFs-in-China-s-Stock-Market-Using-Dynamic-Time/ta-p/398749)!
+
+```{r}
+knitr::include_url("https://community.jmp.com/t5/Discovery-Summit-Americas-2021/An-Analysis-of-ETFs-in-China-s-Stock-Market-Using-Dynamic-Time/ta-p/398749")
+```
