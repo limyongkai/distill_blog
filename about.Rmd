@@ -7,32 +7,23 @@ output:
     theme: lumen
     font-size: 48px 
 ---
-### Some of the Software and skills I am learning~ 
-[![r](img/R.png){width=80px}](https://www.r-project.org/)
+## Some of the Tools I Use: 
 
-* Data manipulation and transformation using *tidyverse*
-* Visualisation using *ggplot* and *shiny* application
-* Confirmatory Data Analysis using statistical tests
-* Predictive Analytics with Regression models<br />
-
+### Python Programming
 [![python](img/python.png){width=180px}](https://www.python.org/)
 
-* Data manipulation and transformation using *numpy*
-* Visualisation using *ggplot* and *seaborn*
+### R Programming
+[![r](img/R.png){width=80px}](https://www.r-project.org/)
 
+### SQL (Structured Query Language)
+[![SQL](img/SQL.png){width=80px}](https://en.wikipedia.org/wiki/SQL)
+
+### JMP Pro, SAS
 [![jmp](img/jmp.png){width=80px}](https://www.jmp.com/en_us/software/predictive-analytics-software.html)
 
-#### JMP Pro, SAS
-* Exploratory and Confirmatory Data Analysis using statistical test
-* Clustering analysis with Hierarchical, K-means and latent class analysis algorthims
-
+### SAS Enterprise Miner
 [![em](img/EM.png){width=80px}](https://www.sas.com/en_sg/software/enterprise-miner.html)
 
-#### SAS Enterprise Miner
-* Regression and Recursive partitioning modeling
-* Time series analysis (Dynamic Time Warping)
-
+### Tableau, BI Visualization tool
 [![tableau](img/tableau.png){width=220px}](https://www.tableau.com/)
-
-* Visusalisation using interactive dashboards
 

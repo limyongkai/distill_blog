@@ -4,8 +4,8 @@
       "path": "about.html",
       "title": "About Yong Kai~",
       "author": [],
-      "contents": "\r\nSome of the Software and skills I am learning~\r\n\r\nData manipulation and transformation using tidyverse\r\nVisualisation using ggplot and shiny application\r\nConfirmatory Data Analysis using statistical tests\r\nPredictive Analytics with Regression models\r\n\r\nData manipulation and transformation using numpy\r\nVisualisation using ggplot and seaborn\r\n\r\nJMP Pro, SAS\r\nExploratory and Confirmatory Data Analysis using statistical test\r\nClustering analysis with Hierarchical, K-means and latent class analysis algorthims\r\n\r\nSAS Enterprise Miner\r\nRegression and Recursive partitioning modeling\r\nTime series analysis (Dynamic Time Warping)\r\n\r\nVisusalisation using interactive dashboards\r\n\r\n\r\n\r\n",
-      "last_modified": "2021-08-10T23:50:00+08:00"
+      "contents": "\r\nSome of the Tools I Use:\r\nPython Programming\r\n\r\nR Programming\r\n\r\nSQL (Structured Query Language)\r\n\r\nJMP Pro, SAS\r\n\r\nSAS Enterprise Miner\r\n\r\nTableau, BI Visualization tool\r\n\r\n\r\n\r\n\r\n",
+      "last_modified": "2022-01-10T16:04:53+08:00"
     },
     {
       "path": "index.html",
