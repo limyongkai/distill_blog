@@ -11,7 +11,16 @@
       <link>https://limyongkai.netlify.app/</link>
     </image>
     <generator>Distill</generator>
-    <lastBuildDate>Fri, 23 Jul 2021 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 31 Aug 2021 00:00:00 +0000</lastBuildDate>
+    <item>
+      <title>JMP Discovery Summit 2021</title>
+      <dc:creator>Yong Kai Lim</dc:creator>
+      <link>https://limyongkai.netlify.app/posts/2022-01-10-jmpdiscovery</link>
+      <description>My presentation on JMP Discovery Summit 2021!</description>
+      <guid>https://limyongkai.netlify.app/posts/2022-01-10-jmpdiscovery</guid>
+      <pubDate>Tue, 31 Aug 2021 00:00:00 +0000</pubDate>
+      <media:content url="https://limyongkai.netlify.app/posts/2022-01-10-jmpdiscovery/dsa-2021-im-presenting.jpg" medium="image" type="image/jpeg"/>
+    </item>
     <item>
       <title>Assignment: VAST Mini-Challenge 2</title>
       <dc:creator>Yong Kai Lim</dc:creator>
@@ -45,7 +54,7 @@
       <link>https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part4</link>
       <description>Part 4 out of 4</description>
       <guid>https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part4</guid>
-      <pubDate>Thu, 22 Jul 2021 00:00:00 +0000</pubDate>
+      <pubDate>Fri, 23 Jul 2021 00:00:00 +0000</pubDate>
       <media:content url="https://limyongkai.netlify.app/posts/2021-07-23-vastmc2part4/vast.jpg" medium="image" type="image/jpeg"/>
     </item>
     <item>
